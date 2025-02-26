@@ -1,0 +1,17 @@
+name: green.ai
+channels:
+  - conda-forge
+dependencies:
+  - pip
+  - python=3.11.0
+  - ipykernel
+  - codecarbon
+  - conda-forge::tqdm
+  - conda-forge::transformers
+  - huggingface_hub
+  - datasets==2.16.1
+  - pytorch
+  - torchaudio
+  - torchvision
+  - matplotlib
+  - anaconda::ipywidgets
