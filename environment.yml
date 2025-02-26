@@ -15,3 +15,5 @@ dependencies:
   - torchvision
   - matplotlib
   - anaconda::ipywidgets
+  - flake8
+  - pre-commit
