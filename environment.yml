@@ -16,5 +16,9 @@ dependencies:
   - matplotlib
   - anaconda::ipywidgets
   - flake8
+  - vllm
   - pre-commit
   - conda-forge::pydantic
+  - pip:
+      - deepeval
+      - vllm
