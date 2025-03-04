@@ -56,7 +56,7 @@ class Experiment(BaseModel):
             dataset_path = data["dataset"]["path"]
         dataset = EvaluationDataset()
         dataset.add_goldens_from_csv_file(
-            file_path="/Users/leenlaptop/Documents/repos/greenai/green.ai/experiments/test/inputs.csv",
+            file_path= str(os.path.join(os.path.dirname(__file__) , '..', dataset_path,)),
             input_col_name="input",
             actual_output_col_name="actual_output",
             expected_output_col_name="expected_output",
