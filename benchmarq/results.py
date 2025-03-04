@@ -105,6 +105,7 @@ class ConsumptionResult:
             experiment_id="1",
         )
 
+
 @dataclass
 class MetricResult:
     """Returned from run_test"""
@@ -122,9 +123,8 @@ class MetricResult:
 
 @dataclass
 class RunResult:
-    #experiment_id: str = None
+    # experiment_id: str = None
     consumption_results: ConsumptionResult
     metric_results: List[TestResult]
-    #id: str = Field(default_factory=lambda: uuid.uuid4().hex)
+    # id: str = Field(default_factory=lambda: uuid.uuid4().hex)
     timestamp: datetime = Field(default_factory=datetime.now)
-

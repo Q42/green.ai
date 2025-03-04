@@ -3,15 +3,14 @@ import os
 import uuid
 from typing import Any
 
-import pandas as pd
 from codecarbon import EmissionsTracker
 from deepeval.dataset import EvaluationDataset, Golden
-from deepeval.evaluate import EvaluationResult, TestResult
+from deepeval.evaluate import TestResult
 from deepeval.metrics import BaseMetric
 from pydantic import BaseModel, Field, ConfigDict
 
 from benchmarq.utility import Evaluator, MetricFactory
-from benchmarq.results import RunResult, MetricResult, ConsumptionResult
+from benchmarq.results import RunResult, ConsumptionResult
 
 
 class Experiment(BaseModel):
@@ -36,13 +35,13 @@ class Experiment(BaseModel):
             experiment_id=uuid.uuid4().hex,
         )
 
-        #warmup
-        for i in range(2):
+        # warmup
+        for _ in range(2):
             self.settings.evaluate_consumption(Golden(input="something"))
 
-        #test
+        # test
         tracker.start()
-        for i in range(5):
+        for _ in range(5):
             self.settings.evaluate_consumption(Golden(input="something"))
         tracker.stop()
 
@@ -66,9 +65,9 @@ class Experiment(BaseModel):
         )
 
         for golden in dataset.goldens:
-             dataset.add_test_case(self.settings.evaluate_test_case(input=golden))
-        return dataset
+            dataset.add_test_case(self.settings.evaluate_test_case(input=golden))
 
+        return dataset
 
     def run(self) -> RunResult:
         c_result: ConsumptionResult = self.__consumption_test()

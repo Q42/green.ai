@@ -44,7 +44,8 @@ class MetricFactory(BaseModel):
 
     @staticmethod
     def get_metrics_from_JSON(path: str) -> list[BaseMetric]:
-        with open(os.path.join(os.path.dirname(__file__) , '..',path), "r") as f:
+
+        with open(os.path.join(os.path.dirname(__file__) , '..', path), "r") as f:
             data = json.loads(f.read())
             metrics = data["metrics"]
             metrics_dict: list[BaseMetric] = []
@@ -52,5 +53,3 @@ class MetricFactory(BaseModel):
                 metric["evaluation_params"] = get_params(metric["evaluation_params"])
                 metrics_dict.append(MetricFactory.get_metric(metric))
             return metrics_dict
-
-
