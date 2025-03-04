@@ -1,11 +1,11 @@
+import json
 from collections import OrderedDict
+from dataclasses import dataclass, Field
 from datetime import datetime
 from typing import Union, List, Optional
 
 from codecarbon.output import EmissionsData
 from deepeval.evaluate import TestResult
-from pydantic import json, Field
-from pydantic.dataclasses import dataclass
 
 
 @dataclass
@@ -122,9 +122,12 @@ class MetricResult:
 
 
 @dataclass
-class RunResult:
+class RunResult(object):
     # experiment_id: str = None
     consumption_results: ConsumptionResult
     metric_results: List[TestResult]
     # id: str = Field(default_factory=lambda: uuid.uuid4().hex)
-    timestamp: datetime = Field(default_factory=datetime.now)
+    timestamp: datetime = datetime.now().isoformat()
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)

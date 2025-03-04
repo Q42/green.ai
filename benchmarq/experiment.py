@@ -1,6 +1,7 @@
 import json
 import os
 import uuid
+from dataclasses import asdict
 from typing import Any
 
 from codecarbon import EmissionsTracker
@@ -69,10 +70,43 @@ class Experiment(BaseModel):
 
         return dataset
 
+    def create_subquestion_json(self) -> dict:
+        data = {
+            'subquestion_id': self.subquestion_id,
+            'subquestion_metrics_path': self.subquestion_path,
+            'experiments': [
+                {
+                    'id': self.id,
+                    'name': self.name,
+                    'description': self.description,
+                    'settings': self.settings.model_dump(),
+                    'runs': [json.loads(run.toJSON()) for run in self.runs ],
+                }
+            ]
+        }
+
+        with open(f'{os.path.dirname(__file__)}/../results/{self.subquestion_id}.json', 'w') as f:
+            json.dump(data, f)
+
+        return data
+
+
+    def __add_to_json(self):
+        with open(f'{os.path.dirname(__file__)}/../results/{self.subquestion_id}.json', 'r') as f:
+            data = json.load(f)
+            data["experiments"]
+
+    def __results_exist(self) -> bool:
+        return os.path.isfile(f'{os.path.dirname(__file__)}/../results/{self.subquestion_id}.json')
+
     def run(self) -> RunResult:
         c_result: ConsumptionResult = self.__consumption_test()
         dataset = self.__test_dataset()
         m_result = self.__metric_test(dataset)
         result = RunResult(consumption_results=c_result, metric_results=m_result)
         self.runs.append(result)
+        if (self.__results_exist()):
+            self.__add_to_json()
+        else:
+            self.create_subquestion_json()
         return result
