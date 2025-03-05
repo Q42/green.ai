@@ -17,7 +17,7 @@ from benchmarq.results import RunResult, ConsumptionResult
 class Experiment(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    id: str = Field(default_factory=lambda: uuid.uuid4().hex)
+    id: str
     subquestion_id: str
     subquestion_path: str
     name: str = Field(max_length=10)
@@ -70,31 +70,31 @@ class Experiment(BaseModel):
 
         return dataset
 
-    def create_subquestion_json(self) -> dict:
-        data = {
+    def create_run_json(self, run: RunResult) -> dict:
+        return {
+
             'subquestion_id': self.subquestion_id,
             'subquestion_metrics_path': self.subquestion_path,
-            'experiments': [
-                {
-                    'id': self.id,
-                    'name': self.name,
-                    'description': self.description,
-                    'settings': self.settings.model_dump(),
-                    'runs': [json.loads(run.toJSON()) for run in self.runs ],
-                }
-            ]
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'settings': self.settings.model_dump(),
+            **json.loads(run.toJSON())
         }
 
-        with open(f'{os.path.dirname(__file__)}/../results/{self.subquestion_id}.json', 'w') as f:
-            json.dump(data, f)
+    def create_subquestion_json(self) -> list[dict]:
+        data = [self.create_run_json(run) for run in self.runs]
 
+        with open(f'{os.path.dirname(__file__)}/../results/{self.subquestion_id}.json', 'w') as f:
+            json.dump(data, f, indent=4)
         return data
 
-
-    def __add_to_json(self):
+    def __add_to_json(self, run: RunResult):
         with open(f'{os.path.dirname(__file__)}/../results/{self.subquestion_id}.json', 'r') as f:
             data = json.load(f)
-            data["experiments"]
+            data.append(self.create_run_json(run))
+        with open(f'{os.path.dirname(__file__)}/../results/{self.subquestion_id}.json', 'w') as f:
+            json.dump(data, f, indent=4)
 
     def __results_exist(self) -> bool:
         return os.path.isfile(f'{os.path.dirname(__file__)}/../results/{self.subquestion_id}.json')
@@ -105,8 +105,8 @@ class Experiment(BaseModel):
         m_result = self.__metric_test(dataset)
         result = RunResult(consumption_results=c_result, metric_results=m_result)
         self.runs.append(result)
-        if (self.__results_exist()):
-            self.__add_to_json()
+        if self.__results_exist():
+            self.__add_to_json(result)
         else:
             self.create_subquestion_json()
         return result
