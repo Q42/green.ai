@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 from abc import abstractmethod
 
 from deepeval.dataset import Golden
@@ -53,3 +54,7 @@ class MetricFactory(BaseModel):
                 metric["evaluation_params"] = get_params(metric["evaluation_params"])
                 metrics_dict.append(MetricFactory.get_metric(metric))
             return metrics_dict
+
+def serve_vllm(model: str) -> bool:
+    subprocess.Popen(["vllm", "serve", "--model", model])
+    return True
