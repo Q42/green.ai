@@ -109,9 +109,10 @@ class Experiment(BaseModel):
     def __results_exist(self) -> bool:
         return os.path.isfile(f'{os.path.dirname(__file__)}/../results/{self.subquestion_id}.json')
 
-    def run(self) -> RunResult:
-        c_result: ConsumptionResult = self.__consumption_test()
+    async def run(self) -> RunResult:
         dataset = self.__test_dataset()
+        c_result: ConsumptionResult = await self.__consumption_test(dataset)
+
         m_result = self.__metric_test(dataset)
         result = RunResult(consumption_results=c_result, metric_results=m_result)
         self.runs.append(result)

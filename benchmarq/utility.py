@@ -67,14 +67,14 @@ class VLLMServerSingleton:
                 cls._instance._process = None
         return cls._instance
 
-    def start_server(self, model_name: str="facebook/opt-125m"):
+    def start_server(self, model: str):
         if self._process is not None:
             print("Server is already running.")
             return
 
         # Start the subprocess and capture the output
         self._process = subprocess.Popen(
-            ["vllm", "serve", model_name],
+            ["vllm", "serve", model],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True
