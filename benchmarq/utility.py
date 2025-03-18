@@ -56,5 +56,5 @@ class MetricFactory(BaseModel):
             return metrics_dict
 
 def serve_vllm(model: str) -> bool:
-    subprocess.Popen(["vllm", "serve", "--model", model])
+    subprocess.Popen(["vllm", "serve", model])
     return True
