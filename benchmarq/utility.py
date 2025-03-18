@@ -18,7 +18,7 @@ class Evaluator(BaseModel):
         pass
 
     @abstractmethod
-    def evaluate_consumption(self, input: Golden):
+    async def async_evaluate_consumption(self, input: Golden):
         pass
 
 

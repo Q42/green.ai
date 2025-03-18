@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import uuid
@@ -29,21 +30,30 @@ class Experiment(BaseModel):
     def model_post_init(self, __context: Any) -> None:
         self.metrics = MetricFactory.get_metrics_from_JSON(self.subquestion_path)
 
-    def __consumption_test(self) -> ConsumptionResult:
+    async def __consumption_test(self, dataset: EvaluationDataset) -> ConsumptionResult:
         # setup
         tracker = EmissionsTracker(
             tracking_mode="machine",
             experiment_id=uuid.uuid4().hex,
         )
-
+        tasks: list[asyncio.Task] = []
         # warmup
-        for _ in range(2):
-            self.settings.evaluate_consumption(Golden(input="something"))
+        for row in dataset.goldens:
+            task = asyncio.create_task(
+                self.settings.async_evaluate_consumption(row)
+            )
+            tasks.append(task)
+        await asyncio.gather(*tasks)
 
         # test
         tracker.start()
-        for _ in range(5):
-            self.settings.evaluate_consumption(Golden(input="something"))
+        for row in dataset.goldens:
+            task = asyncio.create_task(
+                self.settings.async_evaluate_consumption(row)
+            )
+            tasks.append(task)
+        await asyncio.gather(*tasks)
+
         tracker.stop()
 
         return ConsumptionResult.from_tracker(tracker.final_emissions_data)
