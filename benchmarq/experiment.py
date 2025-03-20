@@ -21,6 +21,7 @@ class Experiment(BaseModel):
     id: str
     subquestion_id: str
     subquestion_path: str
+    dataset_name: str
     name: str = Field(max_length=10)
     description: str = Field(min_length=15)
     settings: Evaluator
@@ -64,7 +65,10 @@ class Experiment(BaseModel):
     def __test_dataset(self) -> EvaluationDataset:
         with open(os.path.join(os.path.dirname(__file__) , '..', self.subquestion_path,), "r") as f:
             data = json.loads(f.read())
-            dataset_path = data["dataset"]["path"]
+            for entry in data.get("dataset", []):
+                if entry.get("name") == self.dataset_name:
+                    dataset_path = entry.get("path")
+
         dataset = EvaluationDataset()
         dataset.add_goldens_from_csv_file(
             file_path= str(os.path.join(os.path.dirname(__file__) , '..', dataset_path,)),
