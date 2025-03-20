@@ -18,3 +18,4 @@ dependencies:
   - pip:
       - deepeval
       - vllm
+      - polars
