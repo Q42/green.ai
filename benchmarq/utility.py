@@ -54,7 +54,8 @@ class MetricFactory(BaseModel):
             metrics = data["metrics"]
             metrics_dict: list[BaseMetric] = []
             for metric in metrics:
-                metric["evaluation_params"] = get_params(metric["evaluation_params"])
+                if metric["evaluation_params"] is not None:
+                    metric["evaluation_params"] = get_params(metric["evaluation_params"])
                 metrics_dict.append(MetricFactory.get_metric(metric))
             return metrics_dict
 
