@@ -5,7 +5,7 @@ from abc import abstractmethod
 from threading import Lock
 
 from deepeval.dataset import Golden
-from deepeval.metrics import BaseMetric, GEval, AnswerRelevancyMetric, FaithfulnessMetric
+from deepeval.metrics import BaseMetric, GEval, AnswerRelevancyMetric, FaithfulnessMetric, SummarizationMetric
 from deepeval.test_case import LLMTestCase, LLMTestCaseParams
 from pydantic import BaseModel, ConfigDict
 
@@ -40,9 +40,11 @@ class MetricFactory(BaseModel):
             case "Faithfulness":
                 data.pop("type")
                 return FaithfulnessMetric(**data)
-            case _:
+            case "Summarization":
                 data.pop("type")
-                return GEval(**data)
+                return SummarizationMetric(**data)
+            case _:
+                raise Exception("Metric type not found in MetricFactory. Please check the metric type in the JSON file.")
 
     @staticmethod
     def get_metrics_from_JSON(path: str) -> list[BaseMetric]:
