@@ -28,6 +28,7 @@ class Experiment(BaseModel):
     settings: Evaluator
     metrics: List[BaseMetric] = Field(default_factory=list)
     runs: List[RunResult] = Field(default_factory=list)
+    skip_metrics: bool = False
 
     @property
     def base_dir(self) -> Path:
@@ -139,8 +140,9 @@ class Experiment(BaseModel):
     async def run(self) -> RunResult:
         dataset = self.__test_dataset()
         c_result: ConsumptionResult = await self.__consumption_test(dataset)
-
-        m_result = self.__metric_test(dataset)
+        m_result: List[TestResult] = []
+        if not self.skip_metrics:
+            m_result = self.__metric_test(dataset)
         result = RunResult(consumption_results=c_result, metric_results=m_result)
         self.runs.append(result)
         
