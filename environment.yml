@@ -15,6 +15,7 @@ dependencies:
   - flake8
   - pre-commit
   - conda-forge::pydantic
+  - tqdm
   - pip:
       - deepeval
       - vllm

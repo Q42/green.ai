@@ -1,16 +1,15 @@
 import asyncio
 import json
-import os
 import uuid
-from dataclasses import asdict
 from pathlib import Path
 from typing import Any, List, Dict
 
 from codecarbon import EmissionsTracker
-from deepeval.dataset import EvaluationDataset, Golden
+from deepeval.dataset import EvaluationDataset
 from deepeval.evaluate import TestResult
 from deepeval.metrics import BaseMetric
 from pydantic import BaseModel, Field, ConfigDict
+from tqdm.asyncio import tqdm
 
 from benchmarq.utility import Evaluator, MetricFactory
 from benchmarq.results import RunResult, ConsumptionResult
@@ -55,16 +54,18 @@ class Experiment(BaseModel):
             experiment_id=uuid.uuid4().hex,
         )
         tasks: List[asyncio.Task] = []
-        
+
+        print(f"warmup for: {self.name}")
         # warmup
         for row in dataset.goldens:
             task = asyncio.create_task(
                 self.settings.async_evaluate_consumption(row)
             )
             tasks.append(task)
-        await asyncio.gather(*tasks)
+        await tqdm.gather(*tasks)
 
         # test
+        print(f"testing: {self.name}")
         tracker.start()
         tasks = []
         for row in dataset.goldens:
@@ -72,7 +73,7 @@ class Experiment(BaseModel):
                 self.settings.async_evaluate_consumption(row)
             )
             tasks.append(task)
-        await asyncio.gather(*tasks)
+        await tqdm.gather(*tasks)
 
         tracker.stop()
         return ConsumptionResult.from_tracker(tracker.final_emissions_data)
