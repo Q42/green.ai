@@ -28,6 +28,7 @@ class Experiment(BaseModel):
     metrics: List[BaseMetric] = Field(default_factory=list)
     runs: List[RunResult] = Field(default_factory=list)
     skip_metrics: bool = False
+    debug_mode: bool = False
 
     @property
     def base_dir(self) -> Path:
@@ -102,10 +103,6 @@ class Experiment(BaseModel):
             context_col_name="context",
             retrieval_context_col_name="retrieval_context",
         )
-
-        for golden in dataset.goldens:
-            dataset.add_test_case(self.settings.evaluate_test_case(input=golden))
-
         return dataset
 
     def create_run_json(self, run: RunResult) -> Dict[str, Any]:
@@ -140,9 +137,15 @@ class Experiment(BaseModel):
 
     async def run(self) -> RunResult:
         dataset = self.__test_dataset()
+
+        if self.debug_mode:
+            dataset = EvaluationDataset(goldens=[dataset.goldens[0]])
+
         c_result: ConsumptionResult = await self.__consumption_test(dataset)
         m_result: List[TestResult] = []
         if not self.skip_metrics:
+            for golden in dataset.goldens:
+                dataset.add_test_case(await self.settings.evaluate_test_case(input=golden))
             m_result = self.__metric_test(dataset)
         result = RunResult(consumption_results=c_result, metric_results=m_result)
         self.runs.append(result)

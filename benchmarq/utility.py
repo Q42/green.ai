@@ -14,7 +14,7 @@ class Evaluator(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @abstractmethod
-    def evaluate_test_case(self, input: Golden) -> LLMTestCase:
+    async def evaluate_test_case(self, input: Golden) -> LLMTestCase:
         pass
 
     @abstractmethod
