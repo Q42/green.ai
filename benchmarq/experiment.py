@@ -8,7 +8,7 @@ from codecarbon import EmissionsTracker
 from deepeval.dataset import EvaluationDataset
 from deepeval.evaluate import TestResult
 from deepeval.metrics import BaseMetric
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, computed_field
 from tqdm.asyncio import tqdm
 
 from benchmarq.utility import Evaluator, MetricFactory
@@ -46,10 +46,35 @@ class Experiment(BaseModel):
         """Path to the results JSON file."""
         return self.base_dir / "results" / f"{self.subquestion_id}.json"
 
+    @computed_field
+    @property
+    def dataset(self) -> EvaluationDataset:
+        with open(self.subquestion_file_path, "r") as f:
+            data = json.load(f)
+            dataset_path = next(
+                (entry.get("path") for entry in data.get("dataset", [])
+                 if entry.get("name") == self.dataset_name),
+                None
+            )
+            if not dataset_path:
+                raise ValueError(f"Dataset {self.dataset_name} not found in {self.subquestion_path}")
+
+            dataset = EvaluationDataset()
+            dataset.add_goldens_from_csv_file(
+                file_path=str(self.base_dir / dataset_path),
+                input_col_name="input",
+                actual_output_col_name="actual_output",
+                expected_output_col_name="expected_output",
+                context_col_name="context",
+                retrieval_context_col_name="retrieval_context",
+            )
+            return dataset
+
+
     def model_post_init(self, __context: Any) -> None:
         self.metrics = MetricFactory.get_metrics_from_JSON(self.subquestion_path)
 
-    async def __consumption_test(self, dataset: EvaluationDataset) -> ConsumptionResult:
+    async def __consumption_test(self) -> ConsumptionResult:
         # setup
         tracker = EmissionsTracker(
             tracking_mode="machine",
@@ -58,9 +83,12 @@ class Experiment(BaseModel):
         )
 
         # test
+        print(self.tasks.count())
         print(f"testing: {self.name}")
+
         tracker.start()
-        for row in dataset.goldens:
+        print(f"dataset len: {len(self.dataset.goldens)}")
+        for row in self.dataset.goldens:
             task = asyncio.create_task(
                 self.settings.async_evaluate_consumption(row)
             )
@@ -70,31 +98,9 @@ class Experiment(BaseModel):
         tracker.stop()
         return ConsumptionResult.from_tracker(tracker.final_emissions_data)
 
-    def __metric_test(self, dataset: EvaluationDataset) -> List[TestResult]:
-        return dataset.evaluate(metrics=self.metrics).test_results
-
-    def __test_dataset(self) -> EvaluationDataset:
-        with open(self.subquestion_file_path, "r") as f:
-            data = json.load(f)
-            dataset_path = next(
-                (entry.get("path") for entry in data.get("dataset", []) 
-                 if entry.get("name") == self.dataset_name),
-                None
-            )
+    def __metric_test(self) -> List[TestResult]:
+        return self.dataset.evaluate(metrics=self.metrics).test_results
             
-        if not dataset_path:
-            raise ValueError(f"Dataset {self.dataset_name} not found in {self.subquestion_path}")
-
-        dataset = EvaluationDataset()
-        dataset.add_goldens_from_csv_file(
-            file_path=str(self.base_dir / dataset_path),
-            input_col_name="input",
-            actual_output_col_name="actual_output",
-            expected_output_col_name="expected_output",
-            context_col_name="context",
-            retrieval_context_col_name="retrieval_context",
-        )
-        return dataset
 
     def create_run_json(self, run: RunResult) -> Dict[str, Any]:
         return {
@@ -127,17 +133,16 @@ class Experiment(BaseModel):
         return self.results_file_path.exists()
 
     async def run(self) -> RunResult:
-        dataset = self.__test_dataset()
 
         if self.debug_mode:
-            dataset = EvaluationDataset(goldens=[dataset.goldens[0]])
+            dataset = EvaluationDataset(goldens=[self.dataset.goldens[0]])
 
-        c_result: ConsumptionResult = await self.__consumption_test(dataset)
+        c_result: ConsumptionResult = await self.__consumption_test()
         m_result: List[TestResult] = []
         if not self.skip_metrics:
-            for golden in dataset.goldens:
-                dataset.add_test_case(await self.settings.evaluate_test_case(input=golden))
-            m_result = self.__metric_test(dataset)
+            for golden in self.dataset.goldens:
+                self.dataset.add_test_case(await self.settings.evaluate_test_case(input=golden))
+            m_result = self.__metric_test()
         result = RunResult(consumption_results=c_result, metric_results=m_result)
         self.runs.append(result)
         
