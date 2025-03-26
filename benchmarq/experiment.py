@@ -29,6 +29,7 @@ class Experiment(BaseModel):
     runs: List[RunResult] = Field(default_factory=list)
     skip_metrics: bool = False
     debug_mode: bool = False
+    tasks: List[asyncio.Task] = Field(default_factory=list)
 
     @property
     def base_dir(self) -> Path:
@@ -53,28 +54,18 @@ class Experiment(BaseModel):
         tracker = EmissionsTracker(
             tracking_mode="machine",
             experiment_id=uuid.uuid4().hex,
+            log_level = "error",
         )
-        tasks: List[asyncio.Task] = []
-
-        print(f"warmup for: {self.name}")
-        # warmup
-        for row in dataset.goldens:
-            task = asyncio.create_task(
-                self.settings.async_evaluate_consumption(row)
-            )
-            tasks.append(task)
-        await tqdm.gather(*tasks)
 
         # test
         print(f"testing: {self.name}")
         tracker.start()
-        tasks = []
         for row in dataset.goldens:
             task = asyncio.create_task(
                 self.settings.async_evaluate_consumption(row)
             )
-            tasks.append(task)
-        await tqdm.gather(*tasks)
+            self.tasks.append(task)
+        await tqdm.gather(*self.tasks)
 
         tracker.stop()
         return ConsumptionResult.from_tracker(tracker.final_emissions_data)
