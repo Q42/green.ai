@@ -57,9 +57,8 @@ class Experiment(BaseModel):
             )
             if not dataset_path:
                 raise ValueError(f"Dataset {self.dataset_name} not found in {self.subquestion_path}")
-
-            dataset = EvaluationDataset()
-            dataset.add_goldens_from_csv_file(
+            self.dataset.goldens = []
+            self.dataset.add_goldens_from_csv_file(
                 file_path=str(self.base_dir / dataset_path),
                 input_col_name="input",
                 actual_output_col_name="actual_output",
@@ -67,12 +66,11 @@ class Experiment(BaseModel):
                 context_col_name="context",
                 retrieval_context_col_name="retrieval_context",
             )
-            return dataset
 
 
     def model_post_init(self, __context: Any) -> None:
         self.metrics = MetricFactory.get_metrics_from_JSON(self.subquestion_path)
-        self.dataset = self.__get_dataset()
+        self.__get_dataset()
 
     async def __consumption_test(self) -> ConsumptionResult:
         # setup
