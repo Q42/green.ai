@@ -22,6 +22,7 @@ class Experiment(BaseModel):
     subquestion_id: str
     subquestion_path: str
     dataset_name: str
+    dataset: EvaluationDataset = Field(default_factory=EvaluationDataset)
     name: str = Field(max_length=10)
     description: str = Field(min_length=15)
     settings: Evaluator
@@ -46,9 +47,7 @@ class Experiment(BaseModel):
         """Path to the results JSON file."""
         return self.base_dir / "results" / f"{self.subquestion_id}.json"
 
-    @computed_field
-    @property
-    def dataset(self) -> EvaluationDataset:
+    def __get_dataset(self) -> EvaluationDataset:
         with open(self.subquestion_file_path, "r") as f:
             data = json.load(f)
             dataset_path = next(
@@ -73,6 +72,7 @@ class Experiment(BaseModel):
 
     def model_post_init(self, __context: Any) -> None:
         self.metrics = MetricFactory.get_metrics_from_JSON(self.subquestion_path)
+        self.dataset = self.__get_dataset()
 
     async def __consumption_test(self) -> ConsumptionResult:
         # setup
@@ -83,7 +83,6 @@ class Experiment(BaseModel):
         )
 
         # test
-        print(self.tasks.count())
         print(f"testing: {self.name}")
 
         tracker.start()
