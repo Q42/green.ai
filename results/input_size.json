@@ -40,8 +40,7 @@
             "timestamp": "2025-03-26T15:39:50",
             "tracking_mode": "machine"
         },
-        "metric_results": [],
-        "timestamp": "2025-03-26T15:39:45.846562"
+        "metric_results": []
     },
     {
         "subquestion_id": "input_size",
@@ -84,8 +83,7 @@
             "timestamp": "2025-03-26T15:39:56",
             "tracking_mode": "machine"
         },
-        "metric_results": [],
-        "timestamp": "2025-03-26T15:39:45.846562"
+        "metric_results": []
     },
     {
         "subquestion_id": "input_size",
@@ -128,8 +126,7 @@
             "timestamp": "2025-03-26T15:40:03",
             "tracking_mode": "machine"
         },
-        "metric_results": [],
-        "timestamp": "2025-03-26T15:39:45.846562"
+        "metric_results": []
     },
     {
         "subquestion_id": "input_size",
@@ -172,8 +169,7 @@
             "timestamp": "2025-03-26T15:40:14",
             "tracking_mode": "machine"
         },
-        "metric_results": [],
-        "timestamp": "2025-03-26T15:39:45.846562"
+        "metric_results": []
     },
     {
         "subquestion_id": "input_size",
@@ -216,8 +212,7 @@
             "timestamp": "2025-03-26T15:40:30",
             "tracking_mode": "machine"
         },
-        "metric_results": [],
-        "timestamp": "2025-03-26T15:39:45.846562"
+        "metric_results": []
     },
     {
         "subquestion_id": "input_size",
@@ -260,8 +255,7 @@
             "timestamp": "2025-03-26T15:40:50",
             "tracking_mode": "machine"
         },
-        "metric_results": [],
-        "timestamp": "2025-03-26T15:39:45.846562"
+        "metric_results": []
     },
     {
         "subquestion_id": "input_size",
@@ -304,7 +298,6 @@
             "timestamp": "2025-03-26T15:41:12",
             "tracking_mode": "machine"
         },
-        "metric_results": [],
-        "timestamp": "2025-03-26T15:39:45.846562"
+        "metric_results": []
     }
 ]
