@@ -30,7 +30,7 @@ class ConsumptionResult:
     energy_consumed: float
     country_name: str
     country_iso_code: str
-    region: str
+    region: Optional[str]
     cloud_provider: str
     cloud_region: str
     os: str
@@ -87,7 +87,7 @@ class ConsumptionResult:
             energy_consumed=instance.energy_consumed,
             country_name=instance.country_name,
             country_iso_code=instance.country_iso_code,
-            region=instance.region,
+            region= None if instance.region is float('nan') else instance.region,
             cloud_provider=instance.cloud_provider,
             cloud_region=instance.cloud_region,
             os=instance.os,
