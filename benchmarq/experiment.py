@@ -2,16 +2,17 @@ import asyncio
 import json
 import uuid
 from pathlib import Path
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Callable, Awaitable
 
 from codecarbon import EmissionsTracker
-from deepeval.dataset import EvaluationDataset
+from deepeval.dataset import EvaluationDataset, Golden
 from deepeval.evaluate import TestResult
 from deepeval.metrics import BaseMetric
-from pydantic import BaseModel, Field, ConfigDict, computed_field
+from deepeval.test_case import LLMTestCase
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 from tqdm.asyncio import tqdm
 
-from benchmarq.utility import Evaluator, MetricFactory
+from benchmarq.utility import MetricFactory
 from benchmarq.results import RunResult, ConsumptionResult
 
 
@@ -25,7 +26,8 @@ class Experiment(BaseModel):
     dataset: EvaluationDataset = Field(default_factory=EvaluationDataset)
     name: str = Field(max_length=10)
     description: str = Field(min_length=15)
-    settings: Evaluator
+    c_func: Callable[[Golden], Awaitable[LLMTestCase]]
+    a_func: Callable[[Golden], Awaitable[LLMTestCase]] = None
     metrics: List[BaseMetric] = Field(default_factory=list)
     runs: List[RunResult] = Field(default_factory=list)
     skip_metrics: bool = False
@@ -47,6 +49,14 @@ class Experiment(BaseModel):
         """Path to the results JSON file."""
         return self.base_dir / "results" / f"{self.subquestion_id}.json"
 
+    @model_validator(mode='after')
+    def set_a_func_default(self):
+        # If a_func is None, set it to c_func
+        if self.a_func is None:
+            self.a_func = self.c_func
+        return self
+
+
     def __get_dataset(self) -> EvaluationDataset:
         with open(self.subquestion_file_path, "r") as f:
             data = json.load(f)
@@ -58,7 +68,7 @@ class Experiment(BaseModel):
             if not dataset_path:
                 raise ValueError(f"Dataset {self.dataset_name} not found in {self.subquestion_path}")
             self.dataset.goldens = []
-            self.dataset.add_goldens_from_csv_file(
+            return self.dataset.add_goldens_from_csv_file(
                 file_path=str(self.base_dir / dataset_path),
                 input_col_name="input",
                 actual_output_col_name="actual_output",
@@ -87,7 +97,7 @@ class Experiment(BaseModel):
         print(f"dataset len: {len(self.dataset.goldens)}")
         for row in self.dataset.goldens:
             task = asyncio.create_task(
-                self.settings.async_evaluate_consumption(row)
+                self.c_func(row)
             )
             self.tasks.append(task)
         await tqdm.gather(*self.tasks)
@@ -106,7 +116,6 @@ class Experiment(BaseModel):
             'id': self.id,
             'name': self.name,
             'description': self.description,
-            'settings': self.settings.model_dump(),
             **json.loads(run.toJSON())
         }
 
@@ -132,13 +141,13 @@ class Experiment(BaseModel):
     async def run(self) -> RunResult:
 
         if self.debug_mode:
-            dataset = EvaluationDataset(goldens=[self.dataset.goldens[0]])
+            self.dataset = EvaluationDataset(goldens=[self.dataset.goldens[0]])
 
         c_result: ConsumptionResult = await self.__consumption_test()
         m_result: List[TestResult] = []
         if not self.skip_metrics:
             for golden in self.dataset.goldens:
-                self.dataset.add_test_case(await self.settings.evaluate_test_case(input=golden))
+                self.dataset.add_test_case(await self.a_func(golden))
             m_result = self.__metric_test()
         result = RunResult(consumption_results=c_result, metric_results=m_result)
         self.runs.append(result)

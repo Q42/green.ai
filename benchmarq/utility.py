@@ -1,25 +1,11 @@
 import json
 import os
 import subprocess
-from abc import abstractmethod
 from threading import Lock
 
-from deepeval.dataset import Golden
 from deepeval.metrics import BaseMetric, GEval, AnswerRelevancyMetric, FaithfulnessMetric, SummarizationMetric
-from deepeval.test_case import LLMTestCase, LLMTestCaseParams
-from pydantic import BaseModel, ConfigDict
-
-
-class Evaluator(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    @abstractmethod
-    async def evaluate_test_case(self, input: Golden) -> LLMTestCase:
-        pass
-
-    @abstractmethod
-    async def async_evaluate_consumption(self, input: Golden):
-        pass
+from deepeval.test_case import LLMTestCaseParams
+from pydantic import BaseModel
 
 
 def get_params(input: list[str]) -> list[LLMTestCaseParams]:
