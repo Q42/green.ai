@@ -2,7 +2,7 @@
   "dataset": [
     {
       "name": "beatles",
-      "path": "experiments/test/inputs.csv"
+      "path": "experiments/example/inputs.csv"
     }
   ],
   "metrics": [

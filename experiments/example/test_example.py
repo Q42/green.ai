@@ -48,7 +48,7 @@ async def test_input_size(evaluate_test_case, debug_mode):
         id=uuid.uuid4().hex,
         name="example",
         dataset_name="beatles",
-        description=f"A test to see if energy readings change based on input size. Current dataset size: {dataset_size}",
+        description=f"An example test to show how benchmarks are written",
         subquestion_id="example",
         subquestion_path="experiments/example/tests.json",
         c_func=evaluate_test_case,
