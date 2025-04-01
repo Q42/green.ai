@@ -1,6 +1,7 @@
 import os
 import pytest
 from dotenv import load_dotenv
+from openai import AsyncOpenAI
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -18,6 +19,10 @@ def pytest_addoption(parser):
         default=False,
         help="Run tests in debug mode (using OpenAI API instead of local models)",
     )
+    parser.addoption("--model",
+                     action="store",
+                     default="meta-llama/Llama-3.2-3B-Instruct",
+                     help="Choose model to talk to on vLLM (default is Llama-3.2-3B)")
 
 @pytest.fixture(scope="session")
 def debug_mode(request):
@@ -25,8 +30,15 @@ def debug_mode(request):
     return request.config.getoption("--debug-mode")
 
 @pytest.fixture(scope="session")
-def model_config(debug_mode):
+def model(request):
+    """Get debug mode setting from command line option."""
+    return request.config.getoption("--model")
+
+
+@pytest.fixture(scope="session")
+def model_config(debug_mode, model):
     """Get model configuration based on debug mode."""
+    print(model)
     if debug_mode:
         return {
             "model": "gpt-4",
@@ -34,6 +46,14 @@ def model_config(debug_mode):
         }
     else:
         return {
-            "model": "EleutherAI/pythia-1.4b",
+            "model": model,
             "api_base": "http://localhost:8000/v1",
         }
+
+@pytest.fixture(scope="session")
+def async_client(model_config):
+    """Create an AsyncOpenAI client for the tests."""
+    return AsyncOpenAI(
+        api_key=os.environ["OPENAI_API_KEY"],
+        base_url=model_config["api_base"],
+    )
