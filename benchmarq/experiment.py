@@ -12,7 +12,7 @@ from deepeval.test_case import LLMTestCase
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 from tqdm.asyncio import tqdm
 
-from benchmarq.utility import MetricFactory
+from benchmarq.utility import MetricFactory, SettingsDict
 from benchmarq.results import RunResult, ConsumptionResult
 
 
@@ -21,7 +21,7 @@ class Experiment(BaseModel):
 
     id: str
     subquestion_id: str
-    subquestion_path: str
+    settings: SettingsDict
     dataset_name: str
     dataset: EvaluationDataset = Field(default_factory=EvaluationDataset)
     name: str = Field(max_length=10)
@@ -40,11 +40,6 @@ class Experiment(BaseModel):
         return Path(__file__).parent.parent
 
     @property
-    def subquestion_file_path(self) -> Path:
-        """Full path to the subquestion file."""
-        return self.base_dir / self.subquestion_path
-
-    @property
     def results_file_path(self) -> Path:
         """Path to the results JSON file."""
         return self.base_dir / "results" / f"{self.subquestion_id}.json"
@@ -58,28 +53,24 @@ class Experiment(BaseModel):
 
 
     def __get_dataset(self) -> EvaluationDataset:
-        with open(self.subquestion_file_path, "r") as f:
-            data = json.load(f)
-            dataset_path = next(
-                (entry.get("path") for entry in data.get("dataset", [])
-                 if entry.get("name") == self.dataset_name),
-                None
-            )
-            if not dataset_path:
-                raise ValueError(f"Dataset {self.dataset_name} not found in {self.subquestion_path}")
-            self.dataset.goldens = []
-            return self.dataset.add_goldens_from_csv_file(
-                file_path=str(self.base_dir / dataset_path),
-                input_col_name="input",
-                actual_output_col_name="actual_output",
-                expected_output_col_name="expected_output",
-                context_col_name="context",
-                retrieval_context_col_name="retrieval_context",
-            )
+
+        dataset_path = self.settings['datasets'][self.dataset_name]
+
+        if not dataset_path:
+            raise ValueError(f"Dataset {self.dataset_name} not found in config file")
+        self.dataset.goldens = []
+        return self.dataset.add_goldens_from_csv_file(
+            file_path=str(self.base_dir / dataset_path),
+            input_col_name="input",
+            actual_output_col_name="actual_output",
+            expected_output_col_name="expected_output",
+            context_col_name="context",
+            retrieval_context_col_name="retrieval_context",
+        )
 
 
     def model_post_init(self, __context: Any) -> None:
-        self.metrics = MetricFactory.get_metrics_from_JSON(self.subquestion_path)
+        self.metrics = MetricFactory.get_metrics(self.settings["metrics"])
         self.__get_dataset()
 
     async def __consumption_test(self) -> ConsumptionResult:
@@ -112,7 +103,6 @@ class Experiment(BaseModel):
     def create_run_json(self, run: RunResult) -> Dict[str, Any]:
         return {
             'subquestion_id': self.subquestion_id,
-            'subquestion_metrics_path': self.subquestion_path,
             'id': self.id,
             'name': self.name,
             'description': self.description,

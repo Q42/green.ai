@@ -2,7 +2,8 @@ import json
 import os
 import subprocess
 from threading import Lock
-
+from typing import Optional, List, Dict
+from typing_extensions import TypedDict
 from deepeval.metrics import BaseMetric, GEval, AnswerRelevancyMetric, FaithfulnessMetric, SummarizationMetric
 from deepeval.test_case import LLMTestCaseParams
 from pydantic import BaseModel
@@ -11,11 +12,21 @@ from pydantic import BaseModel
 def get_params(input: list[str]) -> list[LLMTestCaseParams]:
     return [LLMTestCaseParams(val) for val in input]
 
+class MetricDict(TypedDict, total=False):
+    type: str
+    name: Optional[str]
+    criteria: Optional[str]
+    evaluation_params: Optional[List[str]]
+    threshold: Optional[float]
+
+class SettingsDict(TypedDict):
+    datasets: Dict[str, str]
+    metrics: List[MetricDict]
 
 class MetricFactory(BaseModel):
 
     @staticmethod
-    def get_metric(data: dict) -> BaseMetric:
+    def get_metric(data: MetricDict) -> BaseMetric:
         match data["type"]:
             case "GEval":
                 data.pop("type")
@@ -33,17 +44,12 @@ class MetricFactory(BaseModel):
                 raise Exception("Metric type not found in MetricFactory. Please check the metric type in the JSON file.")
 
     @staticmethod
-    def get_metrics_from_JSON(path: str) -> list[BaseMetric]:
+    def get_metrics(data: List[MetricDict]) -> List[BaseMetric]:
+        metrics: List[BaseMetric] = []
+        for metric in data:
+            metrics.append(MetricFactory.get_metric(metric))
+        return metrics
 
-        with open(os.path.join(os.path.dirname(__file__) , '..', path), "r") as f:
-            data = json.loads(f.read())
-            metrics = data["metrics"]
-            metrics_dict: list[BaseMetric] = []
-            for metric in metrics:
-                if "evaluation_params" in metric:
-                    metric["evaluation_params"] = get_params(metric["evaluation_params"])
-                metrics_dict.append(MetricFactory.get_metric(metric))
-            return metrics_dict
 
 class VLLMServerSingleton:
     _instance = None
@@ -93,3 +99,4 @@ class VLLMServerSingleton:
                 print("Server stopped.")
         else:
             print("No server is running.")
+
