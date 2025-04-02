@@ -55,6 +55,7 @@ async def test_example(evaluate_test_case, debug_mode, settings):
         c_func=evaluate_test_case,
         skip_metrics=True,
         debug_mode=debug_mode,
+        metadata=[{"it": "works!"}]
     )
 
     result = await experiment.run()

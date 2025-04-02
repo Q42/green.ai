@@ -33,6 +33,7 @@ class Experiment(BaseModel):
     skip_metrics: bool = False
     debug_mode: bool = False
     tasks: List[asyncio.Task] = Field(default_factory=list)
+    metadata: List[Dict[str, str]] = Field(default_factory=list)
 
     @property
     def base_dir(self) -> Path:
@@ -79,11 +80,9 @@ class Experiment(BaseModel):
             log_level="error",
         )
 
-        # test
-        print(f"testing: {self.name}")
 
         tracker.start()
-        print(f"dataset len: {len(self.dataset.goldens)}")
+
         for row in self.dataset.goldens:
             task = asyncio.create_task(
                 self.c_func(row)
@@ -103,7 +102,8 @@ class Experiment(BaseModel):
             'id': self.id,
             'name': self.name,
             'description': self.description,
-            **json.loads(run.toJSON())
+            **json.loads(run.toJSON()),
+            **self.metadata,
         }
 
     def create_subquestion_json(self) -> List[Dict[str, Any]]:

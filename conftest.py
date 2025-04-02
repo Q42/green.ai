@@ -51,7 +51,6 @@ def model(request):
 @pytest.fixture(scope="session")
 def model_config(debug_mode, model):
     """Get model configuration based on debug mode."""
-    print(model)
     if debug_mode:
         return {
             "model": "gpt-4",
