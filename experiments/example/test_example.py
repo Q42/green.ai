@@ -42,8 +42,9 @@ def evaluate_test_case(async_client, model_config):
 
 @pytest.mark.asyncio
 @pytest.mark.experiment
-async def test_example(evaluate_test_case, debug_mode, settings):
+async def test_example(evaluate_test_case, debug_mode, settings, metadata):
 
+    metadata.update({"hello": "world"})
     """Test energy consumption with different input sizes."""
     experiment = Experiment(
         id=uuid.uuid4().hex,
@@ -55,7 +56,7 @@ async def test_example(evaluate_test_case, debug_mode, settings):
         c_func=evaluate_test_case,
         skip_metrics=True,
         debug_mode=debug_mode,
-        metadata=[{"it": "works!"}]
+        metadata=metadata,
     )
 
     result = await experiment.run()

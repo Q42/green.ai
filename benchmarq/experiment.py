@@ -33,7 +33,7 @@ class Experiment(BaseModel):
     skip_metrics: bool = False
     debug_mode: bool = False
     tasks: List[asyncio.Task] = Field(default_factory=list)
-    metadata: List[Dict[str, str]] = Field(default_factory=list)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
     @property
     def base_dir(self) -> Path:
@@ -97,14 +97,16 @@ class Experiment(BaseModel):
         return self.dataset.evaluate(metrics=self.metrics).test_results
 
     def create_run_json(self, run: RunResult) -> Dict[str, Any]:
-        return {
+        base_dict = {
             'subquestion_id': self.subquestion_id,
             'id': self.id,
             'name': self.name,
             'description': self.description,
-            **json.loads(run.toJSON()),
-            **self.metadata,
+            **json.loads(run.toJSON())
         }
+        # Update with metadata dictionary
+        base_dict.update(self.metadata)
+        return base_dict
 
     def create_subquestion_json(self) -> List[Dict[str, Any]]:
         data = [self.create_run_json(run) for run in self.runs]

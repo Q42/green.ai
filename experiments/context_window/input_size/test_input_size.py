@@ -43,7 +43,7 @@ def evaluate_test_case(async_client, model_config):
         "10000",
         "20000",
     ])
-async def test_input_size(dataset_size: str, evaluate_test_case, debug_mode, settings):
+async def test_input_size(dataset_size: str, evaluate_test_case, debug_mode, settings, metadata):
     """Test energy consumption with different input sizes."""
     experiment = Experiment(
         id=uuid.uuid4().hex,
@@ -55,6 +55,7 @@ async def test_input_size(dataset_size: str, evaluate_test_case, debug_mode, set
         c_func=evaluate_test_case,
         skip_metrics=True,
         debug_mode=debug_mode,
+        metadata=metadata,
     )
 
     result = await experiment.run()
