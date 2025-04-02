@@ -1,3 +1,6 @@
+datasets:
+  beatles: "datasets/example/inputs.csv"
+
 metrics:
   - type: GEval
     name: Correctness
