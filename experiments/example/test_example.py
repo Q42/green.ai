@@ -44,9 +44,7 @@ def evaluate_test_case(async_client, model_config):
 
 @pytest.mark.asyncio
 @pytest.mark.experiment
-async def test_input_size(evaluate_test_case, debug_mode):
-    with open('./settings.yaml', 'r') as file:
-        settings: SettingsDict = yaml.safe_load(file)
+async def test_example(evaluate_test_case, debug_mode, settings):
 
     """Test energy consumption with different input sizes."""
     experiment = Experiment(
@@ -64,3 +62,5 @@ async def test_input_size(evaluate_test_case, debug_mode):
     result = await experiment.run()
     assert result is not None
     assert result.consumption_results is not None
+
+

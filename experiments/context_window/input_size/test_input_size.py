@@ -1,4 +1,7 @@
+import uuid
+
 import pytest
+
 from deepeval.dataset import Golden
 from deepeval.test_case import LLMTestCase
 from benchmarq.experiment import Experiment
@@ -41,16 +44,15 @@ def evaluate_test_case(async_client, model_config):
         "10000",
         "20000",
     ])
-async def test_input_size(dataset_size: str, evaluate_test_case, debug_mode):
-
+async def test_input_size(dataset_size: str, evaluate_test_case, debug_mode, settings):
     """Test energy consumption with different input sizes."""
     experiment = Experiment(
-        id=dataset_size,
+        id=uuid.uuid4().hex,
         name=dataset_size,
         dataset_name=dataset_size,
         description=f"A test to see if energy readings change based on input size. Current dataset size: {dataset_size}",
         subquestion_id="input_size",
-        subquestion_path="experiments/context_window/input_size/tests.json",
+        settings=settings,
         c_func=evaluate_test_case,
         skip_metrics=True,
         debug_mode=debug_mode,
