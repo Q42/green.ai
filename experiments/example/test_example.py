@@ -1,11 +1,13 @@
 import os
 import uuid
+import yaml
 
 import pytest
 from openai import AsyncOpenAI
 from deepeval.dataset import Golden
 from deepeval.test_case import LLMTestCase
 from benchmarq.experiment import Experiment
+from benchmarq.utility import SettingsDict
 
 
 @pytest.fixture(scope="module")
@@ -43,6 +45,9 @@ def evaluate_test_case(async_client, model_config):
 @pytest.mark.asyncio
 @pytest.mark.experiment
 async def test_input_size(evaluate_test_case, debug_mode):
+    with open('settings.yaml', 'r') as file:
+        settings: SettingsDict = yaml.safe_load(file)
+
     """Test energy consumption with different input sizes."""
     experiment = Experiment(
         id=uuid.uuid4().hex,
@@ -50,7 +55,7 @@ async def test_input_size(evaluate_test_case, debug_mode):
         dataset_name="beatles",
         description=f"An example test to show how benchmarks are written",
         subquestion_id="example",
-        subquestion_path="experiments/example/tests.json",
+        settings=settings,
         c_func=evaluate_test_case,
         skip_metrics=True,
         debug_mode=debug_mode,
