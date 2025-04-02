@@ -1,5 +1,3 @@
-import json
-import os
 import subprocess
 from threading import Lock
 from typing import Optional, List, Dict
@@ -12,6 +10,7 @@ from pydantic import BaseModel
 def get_params(input: list[str]) -> list[LLMTestCaseParams]:
     return [LLMTestCaseParams(val) for val in input]
 
+
 class MetricDict(TypedDict, total=False):
     type: str
     name: Optional[str]
@@ -19,9 +18,11 @@ class MetricDict(TypedDict, total=False):
     evaluation_params: Optional[List[str]]
     threshold: Optional[float]
 
+
 class SettingsDict(TypedDict):
     datasets: Dict[str, str]
     metrics: List[MetricDict]
+
 
 class MetricFactory(BaseModel):
 
@@ -99,4 +100,3 @@ class VLLMServerSingleton:
                 print("Server stopped.")
         else:
             print("No server is running.")
-

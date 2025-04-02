@@ -1,6 +1,6 @@
 import json
 from collections import OrderedDict
-from dataclasses import dataclass, Field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Union, List, Optional
 
@@ -87,7 +87,7 @@ class ConsumptionResult:
             energy_consumed=instance.energy_consumed,
             country_name=instance.country_name,
             country_iso_code=instance.country_iso_code,
-            region= None if instance.region is float('nan') else instance.region,
+            region=None if instance.region is float('nan') else instance.region,
             cloud_provider=instance.cloud_provider,
             cloud_region=instance.cloud_region,
             os=instance.os,

@@ -26,7 +26,6 @@ def evaluate_test_case(async_client, model_config):
             actual_output=output,
             context=data.context,
             retrieval_context=data.retrieval_context)
-    
     return _evaluate
 
 
@@ -57,7 +56,7 @@ async def test_input_size(dataset_size: str, evaluate_test_case, debug_mode, set
         skip_metrics=True,
         debug_mode=debug_mode,
     )
-    
+
     result = await experiment.run()
     assert result is not None
     assert result.consumption_results is not None

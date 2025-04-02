@@ -51,7 +51,6 @@ class Experiment(BaseModel):
             self.a_func = self.c_func
         return self
 
-
     def __get_dataset(self) -> EvaluationDataset:
 
         dataset_path = self.settings['datasets'][self.dataset_name]
@@ -68,7 +67,6 @@ class Experiment(BaseModel):
             retrieval_context_col_name="retrieval_context",
         )
 
-
     def model_post_init(self, __context: Any) -> None:
         self.metrics = MetricFactory.get_metrics(self.settings["metrics"])
         self.__get_dataset()
@@ -78,7 +76,7 @@ class Experiment(BaseModel):
         tracker = EmissionsTracker(
             tracking_mode="machine",
             experiment_id=uuid.uuid4().hex,
-            log_level = "error",
+            log_level="error",
         )
 
         # test
@@ -98,7 +96,6 @@ class Experiment(BaseModel):
 
     def __metric_test(self) -> List[TestResult]:
         return self.dataset.evaluate(metrics=self.metrics).test_results
-            
 
     def create_run_json(self, run: RunResult) -> Dict[str, Any]:
         return {
@@ -112,7 +109,7 @@ class Experiment(BaseModel):
     def create_subquestion_json(self) -> List[Dict[str, Any]]:
         data = [self.create_run_json(run) for run in self.runs]
         self.results_file_path.parent.mkdir(exist_ok=True)
-        
+
         with open(self.results_file_path, 'w') as f:
             json.dump(data, f, indent=4)
         return data
@@ -121,7 +118,7 @@ class Experiment(BaseModel):
         with open(self.results_file_path, 'r') as f:
             data = json.load(f)
             data.append(self.create_run_json(run))
-        
+
         with open(self.results_file_path, 'w') as f:
             json.dump(data, f, indent=4)
 
@@ -141,7 +138,7 @@ class Experiment(BaseModel):
             m_result = self.__metric_test()
         result = RunResult(consumption_results=c_result, metric_results=m_result)
         self.runs.append(result)
-        
+
         if self.__results_exist():
             self.__add_to_json(result)
         else:

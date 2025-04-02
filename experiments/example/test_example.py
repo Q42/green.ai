@@ -1,13 +1,11 @@
 import os
 import uuid
-import yaml
 
 import pytest
 from openai import AsyncOpenAI
 from deepeval.dataset import Golden
 from deepeval.test_case import LLMTestCase
 from benchmarq.experiment import Experiment
-from benchmarq.utility import SettingsDict
 
 
 @pytest.fixture(scope="module")
@@ -51,7 +49,7 @@ async def test_example(evaluate_test_case, debug_mode, settings):
         id=uuid.uuid4().hex,
         name="example",
         dataset_name="beatles",
-        description=f"An example test to show how benchmarks are written",
+        description="An example test to show how benchmarks are written",
         subquestion_id="example",
         settings=settings,
         c_func=evaluate_test_case,
@@ -62,5 +60,3 @@ async def test_example(evaluate_test_case, debug_mode, settings):
     result = await experiment.run()
     assert result is not None
     assert result.consumption_results is not None
-
-

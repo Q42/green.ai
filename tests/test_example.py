@@ -11,4 +11,4 @@ def test_example_fast():
 @pytest.mark.slow
 def test_example_slow():
     """Example slow unit test."""
-    assert True 
+    assert True

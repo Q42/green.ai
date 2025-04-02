@@ -28,6 +28,7 @@ def pytest_addoption(parser):
                      default="meta-llama/Llama-3.2-3B-Instruct",
                      help="Choose model to talk to on vLLM (default is Llama-3.2-3B)")
 
+
 def pytest_configure(config):
     """Register custom markers."""
     config.addinivalue_line(
