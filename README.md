@@ -19,4 +19,4 @@ Not all necessary packages have been correctly updated in `enviroment.yml`. Plea
 
 Before running the code. copy the `.env.example` file into `.env` and add the openAI api key.
 
-Find more information in the [Wiki](docs/CONTRIBUTING.md)
+Find more information in the [Wiki](https://github.com/Q42/green.ai/wiki)
