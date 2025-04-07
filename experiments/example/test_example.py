@@ -1,20 +1,9 @@
-import os
 import uuid
 
 import pytest
-from openai import AsyncOpenAI
 from deepeval.dataset import Golden
 from deepeval.test_case import LLMTestCase
 from benchmarq.experiment import Experiment
-
-
-@pytest.fixture(scope="module")
-def async_client(model_config):
-    """Create an AsyncOpenAI client for the tests."""
-    return AsyncOpenAI(
-        api_key=os.environ["OPENAI_API_KEY"],
-        base_url=model_config["api_base"],
-    )
 
 
 @pytest.fixture
