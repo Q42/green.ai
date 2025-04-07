@@ -1,0 +1,19 @@
+datasets:
+  beatles: "datasets/example/inputs.csv"
+
+metrics:
+  - type: GEval
+    name: Correctness
+    criteria: Determine whether the actual output is factually correct based on the expected output
+    evaluation_params:
+      - input
+      - actual_output
+      - expected_output
+  - type: GEval
+    name: Succinctness
+    criteria: Determine whether the actual output is exactly one sentence and not more
+    threshold: 0.7
+    evaluation_params:
+      - input
+      - actual_output
+      - context
