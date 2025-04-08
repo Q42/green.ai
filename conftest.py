@@ -58,7 +58,7 @@ def model_config(debug_mode, model):
     """Get model configuration based on debug mode."""
     if debug_mode:
         return {
-            "model": "gpt-4",
+            "model": "gpt-4o",
             "api_base": "https://api.openai.com/v1",
         }
     else:
