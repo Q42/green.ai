@@ -1,11 +1,12 @@
 import asyncio
 import json
 import uuid
+import pandas as pd
 from pathlib import Path
-from typing import Any, List, Dict, Callable, Awaitable
+from typing import Any, List, Dict, Callable, Awaitable, Union
 
 from codecarbon import EmissionsTracker
-from deepeval.dataset import EvaluationDataset, Golden
+from deepeval.dataset import EvaluationDataset, Golden, ConversationalGolden
 from deepeval.evaluate import TestResult
 from deepeval.metrics import BaseMetric
 from deepeval.test_case import LLMTestCase
@@ -26,12 +27,13 @@ class Experiment(BaseModel):
     dataset: EvaluationDataset = Field(default_factory=EvaluationDataset)
     name: str = Field(max_length=10)
     description: str = Field(min_length=15)
-    c_func: Callable[[Golden], Awaitable[LLMTestCase]]
-    a_func: Callable[[Golden], Awaitable[LLMTestCase]] = None
+    c_func: Callable[[Union[Golden, ConversationalGolden]], Awaitable[LLMTestCase]]
+    a_func: Callable[[Union[Golden, ConversationalGolden]], Awaitable[LLMTestCase]] = None
     metrics: List[BaseMetric] = Field(default_factory=list)
     runs: List[RunResult] = Field(default_factory=list)
     skip_metrics: bool = False
     debug_mode: bool = False
+    conversational: bool = False
     tasks: List[asyncio.Task] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
@@ -68,9 +70,27 @@ class Experiment(BaseModel):
             retrieval_context_col_name="retrieval_context",
         )
 
+    def __get_conversational_dataset(self) -> EvaluationDataset:
+        dataset_path = self.settings['datasets'][self.dataset_name]
+        if not dataset_path:
+            raise ValueError(f"Dataset {self.dataset_name} not found in config file")
+        self.dataset.conversational_goldens = []
+        df = pd.read_csv(dataset_path)
+
+        conv_goldens: List[ConversationalGolden] = []
+
+        for index, row in df.iterrows():
+            data = json.loads(row['conversation'])
+            goldens = []
+            for i in range(0, len(data), 2):
+                user_input = data[i]['content']
+                system_output = data[i + 1]['content']
+                goldens.append(Golden(input=user_input, actual_output=system_output))
+            conv_goldens.append(ConversationalGolden(turns=goldens))
+
     def model_post_init(self, __context: Any) -> None:
         self.metrics = MetricFactory.get_metrics(self.settings["metrics"])
-        self.__get_dataset()
+        self.__get_conversational_dataset() if self.conversational else self.__get_dataset()
 
     async def __consumption_test(self) -> ConsumptionResult:
         # setup
@@ -80,15 +100,17 @@ class Experiment(BaseModel):
             log_level="error",
         )
 
+        rows = self.dataset.conversational_goldens if self.conversational else self.dataset.goldens
 
         tracker.start()
 
-        for row in self.dataset.goldens:
+        for row in rows:
             task = asyncio.create_task(
                 self.c_func(row)
             )
             self.tasks.append(task)
         await tqdm.gather(*self.tasks)
+
 
         tracker.stop()
         return ConsumptionResult.from_tracker(tracker.final_emissions_data)
@@ -133,11 +155,35 @@ class Experiment(BaseModel):
             self.dataset = EvaluationDataset(goldens=[self.dataset.goldens[0]])
 
         c_result: ConsumptionResult = await self.__consumption_test()
+
         m_result: List[TestResult] = []
         if not self.skip_metrics:
             for golden in self.dataset.goldens:
                 self.dataset.add_test_case(await self.a_func(golden))
             m_result = self.__metric_test()
+
+
+        result = RunResult(consumption_results=c_result, metric_results=m_result)
+        self.runs.append(result)
+
+        if self.__results_exist():
+            self.__add_to_json(result)
+        else:
+            self.create_subquestion_json()
+        return result
+
+    async def run_conversational(self) -> RunResult:
+        if self.debug_mode:
+            self.dataset = EvaluationDataset(conversational_goldens=[self.dataset.conversational_goldens[0]])
+
+        c_result: ConsumptionResult = await self.__consumption_test()
+
+        m_result: List[TestResult] = []
+        if not self.skip_metrics:
+            for golden in self.dataset.goldens:
+                self.dataset.add_test_case(await self.a_func(golden))
+            m_result = self.__metric_test()
+
         result = RunResult(consumption_results=c_result, metric_results=m_result)
         self.runs.append(result)
 

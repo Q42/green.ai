@@ -1,10 +1,13 @@
 import subprocess
 from threading import Lock
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Union
 from typing_extensions import TypedDict
-from deepeval.metrics import BaseMetric, GEval, AnswerRelevancyMetric, FaithfulnessMetric, SummarizationMetric
+from deepeval.metrics import BaseMetric, GEval, AnswerRelevancyMetric, FaithfulnessMetric, SummarizationMetric, \
+    BaseConversationalMetric
 from deepeval.test_case import LLMTestCaseParams
 from pydantic import BaseModel
+
+from benchmarq.custom_metrics.conversation_coherence.conversation_coherence import ConversationCoherenceMetric
 
 
 def get_params(input: list[str]) -> list[LLMTestCaseParams]:
@@ -27,7 +30,7 @@ class SettingsDict(TypedDict):
 class MetricFactory(BaseModel):
 
     @staticmethod
-    def get_metric(data: MetricDict) -> BaseMetric:
+    def get_metric(data: MetricDict) -> Union[BaseMetric, BaseConversationalMetric]:
         match data["type"]:
             case "GEval":
                 data.pop("type")
@@ -41,6 +44,9 @@ class MetricFactory(BaseModel):
             case "Summarization":
                 data.pop("type")
                 return SummarizationMetric(**data)
+            case "ConversationalCoherence":
+                data.pop("type")
+                return ConversationCoherenceMetric(**data)
             case _:
                 raise Exception("Metric type not found in MetricFactory. Please check the metric type in the JSON file.")
 
