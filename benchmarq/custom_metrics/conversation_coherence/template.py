@@ -47,8 +47,7 @@ JSON:
         return f"""Based on the given list of message exchanges between a user and an LLM, generate a JSON object to indicate whether the new message was coherent to previous messages. The JSON will have 2 fields: 'verdict' and 'reason'.
 The 'verdict' key should STRICTLY be either 'yes' or 'no', which states whether the new message was coherent to the previous messages or not.
 Provide a 'reason' ONLY if the answer is 'no'.
-You MUST USE look at all messages provided in the list of previous messages to make an informed judgement on satisfaction.
-You MUST ONLY USE judge the new message, and use previous messages in support of a verdict.
+You MUST ONLY judge the new message, and use previous messages only to determine whether the new message was coherent to previous messages or not.  
 
 **
 IMPORTANT: Please make sure to only return in JSON format.
@@ -128,7 +127,7 @@ Be sure in your reason, as if you know what the `actual_output`s from messages i
 Completeness Score:
 {score}
 
-User Intentions:
+Conversation description:
 {description}
 
 Incompletenesses:
