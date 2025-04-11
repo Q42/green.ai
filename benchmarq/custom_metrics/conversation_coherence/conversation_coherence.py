@@ -138,7 +138,7 @@ class ConversationCoherenceMetric(BaseConversationalMetric):
         prompt = ConversationCoherenceTemplate.generate_reason(
             score=self.score,
             incompletenesses=incompletenesses,
-            descriptions=self.conversation_descriptions,
+            description=self.conversation_descriptions,
         )
         if self.using_native_model:
             res, cost = await self.model.a_generate(prompt, schema=Reason)
@@ -165,7 +165,7 @@ class ConversationCoherenceMetric(BaseConversationalMetric):
         prompt = ConversationCoherenceTemplate.generate_reason(
             score=self.score,
             incompletenesses=incompletenesses,
-            descriptions=self.conversation_descriptions,
+            description=self.conversation_descriptions,
         )
         if self.using_native_model:
             res, cost = self.model.generate(prompt, schema=Reason)
