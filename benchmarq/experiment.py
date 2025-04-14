@@ -9,7 +9,7 @@ from codecarbon import EmissionsTracker
 from deepeval.dataset import EvaluationDataset, Golden, ConversationalGolden
 from deepeval.evaluate import TestResult
 from deepeval.metrics import BaseMetric
-from deepeval.test_case import LLMTestCase
+from deepeval.test_case import LLMTestCase, ConversationalTestCase
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 from tqdm.asyncio import tqdm
 
@@ -27,8 +27,8 @@ class Experiment(BaseModel):
     dataset: EvaluationDataset = Field(default_factory=EvaluationDataset)
     name: str = Field(max_length=10)
     description: str = Field(min_length=15)
-    c_func: Callable[[Union[Golden, ConversationalGolden]], Awaitable[LLMTestCase]]
-    a_func: Callable[[Union[Golden, ConversationalGolden]], Awaitable[LLMTestCase]] = None
+    c_func: Callable[[Union[Golden, ConversationalGolden]], Awaitable[Union[LLMTestCase, ConversationalTestCase]]]
+    a_func: Callable[[Union[Golden, ConversationalGolden]], Awaitable[Union[LLMTestCase, ConversationalTestCase]]] = None
     metrics: List[BaseMetric] = Field(default_factory=list)
     runs: List[RunResult] = Field(default_factory=list)
     skip_metrics: bool = False
@@ -54,14 +54,14 @@ class Experiment(BaseModel):
             self.a_func = self.c_func
         return self
 
-    def __get_dataset(self) -> EvaluationDataset:
+    def __get_dataset(self):
 
         dataset_path = self.settings['datasets'][self.dataset_name]
 
         if not dataset_path:
             raise ValueError(f"Dataset {self.dataset_name} not found in config file")
         self.dataset.goldens = []
-        return self.dataset.add_goldens_from_csv_file(
+        self.dataset.add_goldens_from_csv_file(
             file_path=str(self.base_dir / dataset_path),
             input_col_name="input",
             actual_output_col_name="actual_output",
@@ -70,23 +70,22 @@ class Experiment(BaseModel):
             retrieval_context_col_name="retrieval_context",
         )
 
-    def __get_conversational_dataset(self) -> EvaluationDataset:
+    def __get_conversational_dataset(self):
         dataset_path = self.settings['datasets'][self.dataset_name]
         if not dataset_path:
             raise ValueError(f"Dataset {self.dataset_name} not found in config file")
         self.dataset.conversational_goldens = []
-        df = pd.read_csv(dataset_path)
-
-        conv_goldens: List[ConversationalGolden] = []
+        df = pd.read_csv(str(self.base_dir / dataset_path))
 
         for index, row in df.iterrows():
             data = json.loads(row['conversation'])
             goldens = []
-            for i in range(0, len(data), 2):
+            for i in range(0, len(data)-1, 2):
                 user_input = data[i]['content']
                 system_output = data[i + 1]['content']
                 goldens.append(Golden(input=user_input, actual_output=system_output))
-            conv_goldens.append(ConversationalGolden(turns=goldens))
+            goldens.append(Golden(input=data[-1]['content']))
+            self.dataset.conversational_goldens.append(ConversationalGolden(turns=goldens))
 
     def model_post_init(self, __context: Any) -> None:
         self.metrics = MetricFactory.get_metrics(self.settings["metrics"])
@@ -180,7 +179,7 @@ class Experiment(BaseModel):
 
         m_result: List[TestResult] = []
         if not self.skip_metrics:
-            for golden in self.dataset.goldens:
+            for golden in self.dataset.conversational_goldens:
                 self.dataset.add_test_case(await self.a_func(golden))
             m_result = self.__metric_test()
 
