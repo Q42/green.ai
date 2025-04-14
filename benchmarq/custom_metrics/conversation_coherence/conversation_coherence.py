@@ -1,5 +1,5 @@
 import asyncio
-from typing import Optional, Union, Dict, List
+from typing import Union, Dict
 
 from deepeval.metrics import BaseConversationalMetric
 

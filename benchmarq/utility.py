@@ -4,7 +4,7 @@ from typing import Optional, List, Dict, Union
 from typing_extensions import TypedDict
 from deepeval.metrics import BaseMetric, GEval, AnswerRelevancyMetric, FaithfulnessMetric, SummarizationMetric, \
     BaseConversationalMetric
-from deepeval.test_case import LLMTestCaseParams
+from deepeval.test_case import LLMTestCaseParams, LLMTestCase
 from pydantic import BaseModel
 
 from benchmarq.custom_metrics.conversation_coherence.conversation_coherence import ConversationCoherenceMetric
