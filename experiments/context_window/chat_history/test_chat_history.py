@@ -2,8 +2,8 @@ import json
 import uuid
 
 import pytest
-from deepeval.dataset import Golden
-from deepeval.test_case import LLMTestCase
+from deepeval.dataset import Golden, ConversationalGolden
+from deepeval.test_case import LLMTestCase, ConversationalTestCase
 from benchmarq.experiment import Experiment
 
 
@@ -11,17 +11,25 @@ from benchmarq.experiment import Experiment
 def evaluate_test_case_base(async_client, model_config):
     """Create the evaluation function for the experiment."""
 
-    async def _evaluate(data: Golden) -> LLMTestCase:
-        chat = json.loads(data.input)
-        print(chat)
+    async def _evaluate(data: ConversationalGolden) -> ConversationalTestCase:
+
+        messages= []
+        for golden in data.turns:
+            messages.append({"role": "user", "content": golden.input})
+            messages.append({"role": "system", "content": golden.actual_output}) if golden.actual_output else None
+
         output = await async_client.chat.completions.create(
             model=model_config["model"],
-            messages=chat,
+            messages=messages,
         )
-        output = output.choices[0].message.content
-        return LLMTestCase(
-            input=data.input,
-            actual_output=output)
+
+        cases = []
+        for golden in data.turns:
+            cases.append(LLMTestCase(input=golden.input, actual_output=golden.actual_output)) \
+                if golden.actual_output \
+                else cases.append(LLMTestCase(input=golden.input, actual_output=output.choices[0].message.content))
+
+        return ConversationalTestCase(cases)
 
     return _evaluate
 
@@ -60,9 +68,10 @@ async def test_base(evaluate_test_case_base, debug_mode, settings, metadata):
         c_func=evaluate_test_case_base,
         debug_mode=debug_mode,
         metadata=metadata,
+        conversational=True,
     )
 
-    result = await experiment.run()
+    result = await experiment.run_conversational()
     assert result is not None
     assert result.consumption_results is not None
 

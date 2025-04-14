@@ -2,10 +2,4 @@ datasets:
   lmsys: "datasets/context_window/chat_history/lmsys.csv"
 
 metrics:
-  - type: GEval
-    name: Correctness
-    criteria: Determine whether the actual output is factually correct based on the expected output
-    evaluation_params:
-      - input
-      - actual_output
-      - expected_output
+  - type: ConversationalCoherence
