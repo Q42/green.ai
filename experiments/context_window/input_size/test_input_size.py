@@ -46,7 +46,6 @@ def evaluate_test_case(async_client, model_config):
 async def test_input_size(dataset_size: str, evaluate_test_case, debug_mode, settings, metadata):
     metadata.update({"output_max": 50})
 
-
     """Test energy consumption with different input sizes."""
     experiment = Experiment(
         id=uuid.uuid4().hex,

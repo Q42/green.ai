@@ -1,7 +1,6 @@
 import pytest
 from unittest.mock import patch, Mock
 from benchmarq.utility import MetricFactory, MetricDict
-from deepeval.metrics import GEval, AnswerRelevancyMetric, FaithfulnessMetric, SummarizationMetric
 from typing import List
 
 

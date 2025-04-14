@@ -13,7 +13,7 @@ def evaluate_test_case_base(async_client, model_config):
 
     async def _evaluate(data: ConversationalGolden) -> ConversationalTestCase:
 
-        messages= []
+        messages = []
         for golden in data.turns:
             messages.append({"role": "user", "content": golden.input})
             messages.append({"role": "system", "content": golden.actual_output}) if golden.actual_output else None
@@ -32,6 +32,7 @@ def evaluate_test_case_base(async_client, model_config):
         return ConversationalTestCase(cases)
 
     return _evaluate
+
 
 @pytest.fixture
 def evaluate_test_case_cutoff(async_client, model_config):
@@ -75,6 +76,7 @@ async def test_base(evaluate_test_case_base, debug_mode, settings, metadata):
     assert result is not None
     assert result.consumption_results is not None
 
+
 @pytest.mark.asyncio
 @pytest.mark.experiment
 async def test_cutoff(evaluate_test_case_cutoff, debug_mode, settings, metadata):
@@ -95,6 +97,7 @@ async def test_cutoff(evaluate_test_case_cutoff, debug_mode, settings, metadata)
     result = await experiment.run()
     assert result is not None
     assert result.consumption_results is not None
+
 
 @pytest.mark.asyncio
 @pytest.mark.experiment

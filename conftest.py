@@ -47,6 +47,7 @@ def model(request):
     """Get debug mode setting from command line option."""
     return request.config.getoption("--model")
 
+
 @pytest.fixture(scope="session")
 def metadata(model, debug_mode):
     """Get debug mode setting from command line option."""

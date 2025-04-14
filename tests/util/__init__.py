@@ -1,1 +1,1 @@
-# Unit tests for benchmarq.utility module 
+# Unit tests for benchmarq.utility module

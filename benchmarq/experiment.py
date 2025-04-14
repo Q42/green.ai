@@ -77,10 +77,12 @@ class Experiment(BaseModel):
         self.dataset.conversational_goldens = []
         df = pd.read_csv(str(self.base_dir / dataset_path))
 
-        for index, row in df.iterrows():
+        for _, row in df.iterrows():
             data = json.loads(row['conversation'])
             goldens = []
-            for i in range(0, len(data)-1, 2):
+
+            for i in range(0, len(data) -1, 2):
+
                 user_input = data[i]['content']
                 system_output = data[i + 1]['content']
                 goldens.append(Golden(input=user_input, actual_output=system_output))
@@ -109,7 +111,6 @@ class Experiment(BaseModel):
             )
             self.tasks.append(task)
         await tqdm.gather(*self.tasks)
-
 
         tracker.stop()
         return ConsumptionResult.from_tracker(tracker.final_emissions_data)
@@ -160,7 +161,6 @@ class Experiment(BaseModel):
             for golden in self.dataset.goldens:
                 self.dataset.add_test_case(await self.a_func(golden))
             m_result = self.__metric_test()
-
 
         result = RunResult(consumption_results=c_result, metric_results=m_result)
         self.runs.append(result)
