@@ -22,3 +22,4 @@ dependencies:
       - polars
       - pytest
       - pytest-asyncio
+      - mistral_common
