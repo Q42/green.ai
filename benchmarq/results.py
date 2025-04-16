@@ -120,12 +120,19 @@ class MetricResult:
     context: Optional[List[str]] = None
     retrieval_context: Optional[List[str]] = None
 
+@dataclass
+class BenchmarkResult:
+    name: str
+    score: float
+    individual_score: List[Union[bool, float]]
+
+
 
 @dataclass
 class RunResult(object):
     # experiment_id: str = None
     consumption_results: ConsumptionResult
-    metric_results: List[TestResult]
+    metric_results: Union[List[TestResult], List[BenchmarkResult]]
     # id: str = Field(default_factory=lambda: uuid.uuid4().hex)
     timestamp: datetime = datetime.now().isoformat()
 
