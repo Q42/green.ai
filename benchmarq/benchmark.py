@@ -2,9 +2,8 @@ import asyncio
 import json
 import os
 import uuid
-from dataclasses import asdict
 from pathlib import Path
-from typing import Callable, Union, Any, Awaitable, List, Tuple
+from typing import Callable, Any, Awaitable, List, Tuple
 
 import pandas as pd
 from codecarbon import EmissionsTracker
@@ -102,6 +101,6 @@ def export_results(name: str,  metadata: dict, config: dict, consumption: Consum
     else:
         results_file_path.parent.mkdir(exist_ok=True)
 
-        data = result
+        data = [result]
         with open(results_file_path, 'w') as f:
             json.dump(data, f, indent=4)
