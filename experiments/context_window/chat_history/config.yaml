@@ -1,5 +1,9 @@
-datasets:
-  lmsys: "datasets/context_window/chat_history/lmsys.csv"
-
-metrics:
-  - type: ConversationalCoherence
+MRCR-64000:
+  benchmark: "MRCR"
+  type: csv
+  path: "datasets/benchmarks/MRCR/MRCR-64000.csv"
+  accuracy: true
+  consumption: true
+  info:
+    max_tokens: 200
+    message_len: 5

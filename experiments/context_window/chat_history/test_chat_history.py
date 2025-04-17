@@ -2,8 +2,10 @@ import json
 import uuid
 
 import pytest
-from deepeval.dataset import Golden, ConversationalGolden
-from deepeval.test_case import LLMTestCase, ConversationalTestCase
+from deepeval.dataset import Golden
+from deepeval.test_case import LLMTestCase
+
+from benchmarq.benchmark import get_dataset, run, evaluate_dataset, export_results
 from benchmarq.experiment import Experiment
 
 
@@ -11,25 +13,14 @@ from benchmarq.experiment import Experiment
 def evaluate_test_case_base(async_client, model_config):
     """Create the evaluation function for the experiment."""
 
-    async def _evaluate(data: ConversationalGolden) -> ConversationalTestCase:
-
-        messages = []
-        for golden in data.turns:
-            messages.append({"role": "user", "content": golden.input})
-            messages.append({"role": "system", "content": golden.actual_output}) if golden.actual_output else None
+    async def _evaluate(row) -> str:
 
         output = await async_client.chat.completions.create(
             model=model_config["model"],
-            messages=messages,
+            messages=json.loads(row["prompt"]),
         )
 
-        cases = []
-        for golden in data.turns:
-            cases.append(LLMTestCase(input=golden.input, actual_output=golden.actual_output)) \
-                if golden.actual_output \
-                else cases.append(LLMTestCase(input=golden.input, actual_output=output.choices[0].message.content))
-
-        return ConversationalTestCase(cases)
+        return output.choices[0].message.content
 
     return _evaluate
 
@@ -56,25 +47,21 @@ def evaluate_test_case_cutoff(async_client, model_config):
 
 @pytest.mark.asyncio
 @pytest.mark.experiment
-async def test_base(evaluate_test_case_base, debug_mode, settings, metadata):
+@pytest.mark.parametrize("dataset_name", ["MRCR-64000"])
+async def test_base(dataset_name, evaluate_test_case_base, debug_mode, settings, metadata):
 
-    """Test energy consumption with different input sizes."""
-    experiment = Experiment(
-        id=uuid.uuid4().hex,
-        name="ch-base",
-        dataset_name="lmsys",
-        description="Baseline test for the chat history tests.",
-        subquestion_id="chat_history",
-        settings=settings,
-        c_func=evaluate_test_case_base,
-        debug_mode=debug_mode,
-        metadata=metadata,
-        conversational=True,
-    )
+    config = settings[dataset_name]
 
-    result = await experiment.run_conversational()
-    assert result is not None
-    assert result.consumption_results is not None
+    dataset = get_dataset(config)
+
+    dataset, consumption = await run(dataset, evaluate_test_case_base)
+
+    accuracy = evaluate_dataset(dataset, config)
+
+    export_results(accuracy, consumption, metadata, config, "chat_history_base")
+
+    assert consumption is not None
+    assert accuracy is not None
 
 
 @pytest.mark.asyncio
