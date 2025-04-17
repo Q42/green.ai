@@ -1,21 +1,71 @@
-datasets:
-  "100": "datasets/context_window/input_size/processed_OpenCaselist-100.csv"
-  "500": "datasets/context_window/input_size/processed_OpenCaselist-500.csv"
-  "1000": "datasets/context_window/input_size/processed_OpenCaselist-1000.csv"
-  "2000": "datasets/context_window/input_size/processed_OpenCaselist-2000.csv"
-  "3000": "datasets/context_window/input_size/processed_OpenCaselist-3000.csv"
-  "4000": "datasets/context_window/input_size/processed_OpenCaselist-4000.csv"
-  "5000": "datasets/context_window/input_size/processed_OpenCaselist-5000.csv"
-  "10000": "datasets/context_window/input_size/processed_OpenCaselist-10000.csv"
-  "20000": "datasets/context_window/input_size/processed_OpenCaselist-20000.csv"
+OpenCaselist-100:
+  type: csv
+  path: "datasets/context_window/input_size/processed_OpenCaselist-100.csv"
+  accuracy: false
+  consumption: true
+  info:
+    max_output_tokens: 50
 
-metrics:
-  - type: "GEval"
-    name: "Correctness"
-    criteria: "Determine whether the actual output is factually correct based on the expected output"
-    evaluation_params:
-      - "input"
-      - "actual_output"
-      - "expected_output"
-  - type: "Summarization"
-    threshold: 0.5
+OpenCaselist-500:
+  type: csv
+  path: "datasets/context_window/input_size/processed_OpenCaselist-500.csv"
+  accuracy: false
+  consumption: true
+  info:
+    max_output_tokens: 50
+
+OpenCaselist-1000:
+  type: csv
+  path: "datasets/context_window/input_size/processed_OpenCaselist-1000.csv"
+  accuracy: false
+  consumption: true
+  info:
+    max_output_tokens: 50
+
+OpenCaselist-2000:
+  type: csv
+  path: "datasets/context_window/input_size/processed_OpenCaselist-2000.csv"
+  accuracy: false
+  consumption: true
+  info:
+    max_output_tokens: 50
+
+OpenCaselist-3000:
+  type: csv
+  path: "datasets/context_window/input_size/processed_OpenCaselist-3000.csv"
+  accuracy: false
+  consumption: true
+  info:
+    max_output_tokens: 50
+
+OpenCaselist-4000:
+  type: csv
+  path: "datasets/context_window/input_size/processed_OpenCaselist-4000.csv"
+  accuracy: false
+  consumption: true
+  info:
+    max_output_tokens: 50
+
+OpenCaselist-5000:
+  type: csv
+  path: "datasets/context_window/input_size/processed_OpenCaselist-5000.csv"
+  accuracy: false
+  consumption: true
+  info:
+    max_output_tokens: 50
+
+OpenCaselist-10000:
+  type: csv
+  path: "datasets/context_window/input_size/processed_OpenCaselist-10000.csv"
+  accuracy: false
+  consumption: true
+  info:
+    max_output_tokens: 50
+
+OpenCaselist-20000:
+  type: csv
+  path: "datasets/context_window/input_size/processed_OpenCaselist-20000.csv"
+  accuracy: false
+  consumption: true
+  info:
+    max_output_tokens: 50
