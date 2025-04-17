@@ -1,9 +1,0 @@
-MRCR-200:
-  benchmark: "MRCR"
-  type: csv
-  path: "datasets/benchmarks/MRCR/MRCR-200.csv"
-  accuracy: true
-  consumption: true
-  info:
-    average_tokens: 200
-    message_len: 5
