@@ -8,13 +8,6 @@ from openai import AsyncOpenAI
 from benchmarq.utility import SettingsDict
 
 
-@pytest.fixture(scope="session", autouse=True)
-def load_env():
-    """Load environment variables from .env file."""
-    dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-    load_dotenv(dotenv_path)
-
-
 def pytest_addoption(parser):
     """Add debug option to pytest command line."""
     parser.addoption(
@@ -35,6 +28,14 @@ def pytest_configure(config):
         "markers", "config_path(path): specify a custom path for the config file"
     )
 
+
+@pytest.fixture(scope="session", autouse=True)
+def load_env(debug_mode):
+    """Load environment variables from .env file."""
+    dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+    load_dotenv(dotenv_path)
+
+    os.environ["debug"] = "True" if debug_mode else  "False"
 
 @pytest.fixture(scope="session")
 def debug_mode(request):
