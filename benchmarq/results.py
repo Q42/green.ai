@@ -124,6 +124,7 @@ class MetricResult:
 class BenchmarkResult:
     name: str
     score: float
+    std: Optional[float]
     individual_score: List[Union[bool, float]]
 
 
