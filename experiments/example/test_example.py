@@ -1,7 +1,6 @@
 import pytest
 
-from benchmarq.benchmark import *
-
+import benchmarq as bq
 
 @pytest.fixture
 def evaluate_test_case(async_client, model_config):
@@ -25,10 +24,10 @@ def evaluate_test_case(async_client, model_config):
 async def test_example(evaluate_test_case, debug_mode, settings, metadata):
     config = settings["beatles"]
 
-    dataset = get_dataset(config)
+    dataset = bq.get_dataset(config)
 
-    _, consumption = await run(dataset, evaluate_test_case)
+    _, consumption = await bq.run(dataset, evaluate_test_case)
 
-    export_results("example", metadata, config, consumption)
+    bq.export_results("example", metadata, config, consumption)
 
     assert consumption is not None

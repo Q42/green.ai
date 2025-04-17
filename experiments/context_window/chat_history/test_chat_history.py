@@ -1,7 +1,8 @@
+import json
+
 import pytest
 
-from benchmarq.benchmark import *
-
+import benchmarq as bq
 
 @pytest.fixture
 def evaluate_test_case_base(async_client, model_config):
@@ -43,13 +44,13 @@ async def test_base(dataset_name, evaluate_test_case_base, debug_mode, settings,
 
     config = settings[dataset_name]
 
-    dataset = get_dataset(config)
+    dataset = bq.get_dataset(config)
 
-    dataset, consumption = await run(dataset, evaluate_test_case_base)
+    dataset, consumption = await bq.run(dataset, evaluate_test_case_base)
 
-    accuracy = evaluate_dataset(dataset, config)
+    accuracy = bq.evaluate_dataset(dataset, config)
 
-    export_results("chat_history_base", metadata, config, consumption, accuracy)
+    bq.export_results("chat_history_base", metadata, config, consumption, accuracy)
 
     assert consumption is not None
     assert accuracy is not None
@@ -62,13 +63,13 @@ async def test_cutoff(dataset_name, evaluate_test_case_cutoff, debug_mode, setti
 
     config = settings[dataset_name]
 
-    dataset = get_dataset(config)
+    dataset = bq.get_dataset(config)
 
-    dataset, consumption = await run(dataset, evaluate_test_case_cutoff)
+    dataset, consumption = await bq.run(dataset, evaluate_test_case_cutoff)
 
-    accuracy = evaluate_dataset(dataset, config)
+    accuracy = bq.evaluate_dataset(dataset, config)
 
-    export_results("chat_history_cutoff", metadata, config, consumption, accuracy)
+    bq.export_results("chat_history_cutoff", metadata, config, consumption, accuracy)
 
     assert consumption is not None
     assert accuracy is not None
