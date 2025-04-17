@@ -1,11 +1,9 @@
 import json
 from collections import OrderedDict
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Union, List, Optional
 
 from codecarbon.output import EmissionsData
-from deepeval.evaluate import TestResult
 
 
 @dataclass
@@ -105,37 +103,9 @@ class ConsumptionResult:
             experiment_id="1",
         )
 
-
-@dataclass
-class MetricResult:
-    """Returned from run_test"""
-
-    name: str
-    success: bool
-    metrics_data: Union[List[str], None]
-    conversational: bool
-    input: Union[Optional[str], List[str]] = None
-    actual_output: Union[Optional[str], List[str]] = None
-    expected_output: Optional[str] = None
-    context: Optional[List[str]] = None
-    retrieval_context: Optional[List[str]] = None
-
 @dataclass
 class BenchmarkResult:
     name: str
     score: float
     std: Optional[float]
     individual_score: List[Union[bool, float]]
-
-
-
-@dataclass
-class RunResult(object):
-    # experiment_id: str = None
-    consumption_results: ConsumptionResult
-    metric_results: Union[List[TestResult], List[BenchmarkResult]]
-    # id: str = Field(default_factory=lambda: uuid.uuid4().hex)
-    timestamp: datetime = datetime.now().isoformat()
-
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)

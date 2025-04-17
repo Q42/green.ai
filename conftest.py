@@ -5,9 +5,6 @@ import yaml
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
 
-from benchmarq.utility import SettingsDict
-
-
 def pytest_addoption(parser):
     """Add debug option to pytest command line."""
     parser.addoption(
@@ -80,7 +77,7 @@ def async_client(model_config):
 
 
 @pytest.fixture(scope="module")
-def settings(request) -> SettingsDict | None:
+def settings(request) -> dict | None:
     """
     Load settings from a YAML configuration file.
 
@@ -110,7 +107,7 @@ def settings(request) -> SettingsDict | None:
     # Load and return the settings
     try:
         with open(config_path, 'r') as file:
-            conf: SettingsDict = yaml.safe_load(file)
+            conf: dict = yaml.safe_load(file)
             return conf
     except FileNotFoundError:
         pytest.fail(f"Config file not found: {config_path}")
