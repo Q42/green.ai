@@ -58,7 +58,7 @@ async def test_base(dataset_name, evaluate_test_case_base, debug_mode, settings,
 
     accuracy = evaluate_dataset(dataset, config)
 
-    export_results(accuracy, consumption, metadata, config, "chat_history_base")
+    export_results("chat_history_base", metadata, config, consumption, accuracy)
 
     assert consumption is not None
     assert accuracy is not None

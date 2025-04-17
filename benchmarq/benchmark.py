@@ -80,14 +80,14 @@ def evaluate_dataset(dataset: pd.DataFrame, config: dict) -> BenchmarkResult | N
 
     return benchmark.grade_all(dataset)
 
-def export_results(accuracy: BenchmarkResult, consumption: ConsumptionResult, metadata: dict, config: dict, name: str) -> None:
+def export_results(name: str,  metadata: dict, config: dict, consumption: ConsumptionResult, accuracy: BenchmarkResult = None) -> None:
     base_dir = Path(__file__).parent.parent
     results_file_path = base_dir / "results" / f"{name}.json"
 
     result = {
     "name": name,
     **metadata,
-    **vars(accuracy),
+    **(vars(accuracy) if accuracy is not None else {}),
     **vars(consumption),
     "config": config
 }
