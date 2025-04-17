@@ -5,6 +5,8 @@ OpenCaselist-100:
   consumption: true
   info:
     max_output_tokens: 50
+    mean: 24.39
+    std: 4.417355578061417
 
 OpenCaselist-500:
   type: csv
@@ -13,6 +15,8 @@ OpenCaselist-500:
   consumption: true
   info:
     max_output_tokens: 50
+    mean: 110.37
+    std: 14.053760415567849
 
 OpenCaselist-1000:
   type: csv
@@ -21,6 +25,8 @@ OpenCaselist-1000:
   consumption: true
   info:
     max_output_tokens: 50
+    mean: 215.22
+    std: 25.42391302564091
 
 OpenCaselist-2000:
   type: csv
@@ -29,6 +35,8 @@ OpenCaselist-2000:
   consumption: true
   info:
     max_output_tokens: 50
+    mean: 406.62
+    std: 28.606271827674217
 
 OpenCaselist-3000:
   type: csv
@@ -37,6 +45,8 @@ OpenCaselist-3000:
   consumption: true
   info:
     max_output_tokens: 50
+    mean: 610.41
+    std: 37.70997644168348
 
 OpenCaselist-4000:
   type: csv
@@ -45,6 +55,8 @@ OpenCaselist-4000:
   consumption: true
   info:
     max_output_tokens: 50
+    mean: 802.95
+    std: 48.202304106879794
 
 OpenCaselist-5000:
   type: csv
@@ -53,6 +65,8 @@ OpenCaselist-5000:
   consumption: true
   info:
     max_output_tokens: 50
+    mean: 1015.91
+    std: 62.5532653831997
 
 OpenCaselist-10000:
   type: csv
@@ -61,6 +75,8 @@ OpenCaselist-10000:
   consumption: true
   info:
     max_output_tokens: 50
+    mean: 2009.56
+    std: 132.79788850700612
 
 OpenCaselist-20000:
   type: csv
@@ -69,3 +85,5 @@ OpenCaselist-20000:
   consumption: true
   info:
     max_output_tokens: 50
+    mean: 4009.61
+    std: 128.3935628047486
