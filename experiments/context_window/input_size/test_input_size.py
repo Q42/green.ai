@@ -38,7 +38,7 @@ async def test_input_size(dataset_name: str, evaluate_test_case, debug_mode, set
 
     dataset = get_dataset(config)
 
-    dataset, consumption = await run(dataset, evaluate_test_case)
+    _, consumption = await run(dataset, evaluate_test_case)
 
     export_results("input_size", metadata, config, consumption)
 
