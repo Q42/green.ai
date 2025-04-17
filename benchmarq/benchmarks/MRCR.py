@@ -23,7 +23,7 @@ class MRCR(BaseBenchmark):
     def grade_all(self, df: pd.DataFrame) -> BenchmarkResult:
         scores = []
 
-        for index, row in df.iterrows():
+        for _, row in df.iterrows():
             scores.append(_grade(row))
 
-        return BenchmarkResult(name="MRCR",score=float(np.mean(scores)), std=float(np.std(scores)), individual_score=scores)
+        return BenchmarkResult(name="MRCR", score=float(np.mean(scores)), std=float(np.std(scores)), individual_score=scores)

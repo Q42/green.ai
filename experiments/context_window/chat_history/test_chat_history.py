@@ -4,6 +4,7 @@ import pytest
 
 import benchmarq as bq
 
+
 @pytest.fixture
 def evaluate_test_case_base(async_client, model_config):
     """Create the evaluation function for the experiment."""
@@ -73,4 +74,3 @@ async def test_cutoff(dataset_name, evaluate_test_case_cutoff, debug_mode, setti
 
     assert consumption is not None
     assert accuracy is not None
-

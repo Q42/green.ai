@@ -103,6 +103,7 @@ class ConsumptionResult:
             experiment_id="1",
         )
 
+
 @dataclass
 class BenchmarkResult:
     name: str

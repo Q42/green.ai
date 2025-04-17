@@ -5,6 +5,7 @@ import yaml
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
 
+
 def pytest_addoption(parser):
     """Add debug option to pytest command line."""
     parser.addoption(
@@ -32,7 +33,8 @@ def load_env(debug_mode):
     dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
     load_dotenv(dotenv_path)
 
-    os.environ["debug"] = "True" if debug_mode else  "False"
+    os.environ["debug"] = "True" if debug_mode else "False"
+
 
 @pytest.fixture(scope="session")
 def debug_mode(request):

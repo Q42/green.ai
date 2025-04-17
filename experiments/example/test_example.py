@@ -2,6 +2,7 @@ import pytest
 
 import benchmarq as bq
 
+
 @pytest.fixture
 def evaluate_test_case(async_client, model_config):
     """Create the evaluation function for the experiment."""

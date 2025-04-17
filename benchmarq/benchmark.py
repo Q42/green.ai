@@ -27,10 +27,12 @@ def get_dataset(config: dict) -> pd.DataFrame:
 
     return df
 
+
 async def run(
         dataset: pd.DataFrame,
         func: Callable[[Any], Awaitable[str]]
-              ) -> Tuple[pd.DataFrame, ConsumptionResult]:
+) -> Tuple[pd.DataFrame, ConsumptionResult]:
+
     tracker = EmissionsTracker(
         tracking_mode="machine",
         experiment_id=uuid.uuid4().hex,
@@ -71,6 +73,7 @@ def __get_benchmark(benchmark_name: str) -> BaseBenchmark:
         case _:
             return MRCR()
 
+
 def evaluate_dataset(dataset: pd.DataFrame, config: dict) -> BenchmarkResult | None:
     if not config["accuracy"]:
         return None
@@ -79,17 +82,25 @@ def evaluate_dataset(dataset: pd.DataFrame, config: dict) -> BenchmarkResult | N
 
     return benchmark.grade_all(dataset)
 
-def export_results(name: str,  metadata: dict, config: dict, consumption: ConsumptionResult, accuracy: BenchmarkResult = None) -> None:
+
+def export_results(
+        name: str,
+        metadata: dict,
+        config: dict,
+        consumption:
+        ConsumptionResult,
+        accuracy: BenchmarkResult = None) -> None:
+
     base_dir = Path(__file__).parent.parent
     results_file_path = base_dir / "results" / f"{name}.json"
 
     result = {
-    "name": name,
-    **metadata,
-    **(vars(accuracy) if accuracy is not None else {}),
-    **vars(consumption),
-    "config": config
-}
+        "name": name,
+        **metadata,
+        **(vars(accuracy) if accuracy is not None else {}),
+        **vars(consumption),
+        "config": config
+    }
 
     if results_file_path.exists():
         with open(results_file_path, 'r') as f:
