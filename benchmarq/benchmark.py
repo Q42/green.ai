@@ -84,7 +84,13 @@ def export_results(accuracy: BenchmarkResult, consumption: ConsumptionResult, me
     base_dir = Path(__file__).parent.parent
     results_file_path = base_dir / "results" / f"{name}.json"
 
-    result = {"name": name} | metadata | vars(accuracy) | vars(consumption) | config,
+    result = {
+    "name": name,
+    **metadata,
+    **vars(accuracy),
+    **vars(consumption),
+    "config": config
+}
 
     if results_file_path.exists():
         with open(results_file_path, 'r') as f:
@@ -96,6 +102,6 @@ def export_results(accuracy: BenchmarkResult, consumption: ConsumptionResult, me
     else:
         results_file_path.parent.mkdir(exist_ok=True)
 
-        data = [result]
+        data = result
         with open(results_file_path, 'w') as f:
             json.dump(data, f, indent=4)
