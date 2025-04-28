@@ -20,14 +20,18 @@ def evaluate_test_case_base(async_client, model_config):
 
     return _evaluate
 
+@pytest.fixture
+def cutoff(request):
+    """Fixture that receives the cutoff value from parametrize"""
+    return request.param
 
 @pytest.fixture
-def evaluate_test_case_cutoff(async_client, model_config):
+def evaluate_cutoff(async_client, model_config, cutoff):
     """Create the evaluation function for the experiment."""
 
     async def _evaluate(row) -> str:
 
-        chat = json.loads(row["prompt"])[-6:]
+        chat = json.loads(row["prompt"])[-cutoff:]
 
         output = await async_client.chat.completions.create(
             model=model_config["model"],
@@ -60,15 +64,18 @@ async def test_base(dataset_name, evaluate_test_case_base, debug_mode, settings,
 @pytest.mark.asyncio
 @pytest.mark.experiment
 @pytest.mark.parametrize("dataset_name", ["MRCR-64000"])
-async def test_cutoff(dataset_name, evaluate_test_case_cutoff, debug_mode, settings, metadata):
+@pytest.mark.parametrize("cutoff", [1, 5, 10, 15, 20, 25, 30], indirect=True)
+async def test_cutoff(dataset_name, cutoff, evaluate_cutoff, debug_mode, settings, metadata):
 
     config = settings[dataset_name]
 
     dataset = bq.get_dataset(config)
 
-    dataset, consumption = await bq.run(dataset, evaluate_test_case_cutoff)
+    dataset, consumption = await bq.run(dataset, evaluate_cutoff)
 
     accuracy = bq.evaluate_dataset(dataset, config)
+
+    metadata.update({"cutoff": cutoff})
 
     bq.export_results("chat_history_cutoff", metadata, config, consumption, accuracy)
 
