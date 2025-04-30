@@ -22,3 +22,5 @@ dependencies:
       - pytest
       - pytest-asyncio
       - mistral_common
+      - spacy
+      - scikit-learn

@@ -4,6 +4,7 @@ import pytest
 
 import benchmarq as bq
 from experiments.context_window.chat_history.sequence_matcher import summarize_conversation
+from experiments.context_window.chat_history.spacy_sentence import summarize_chat
 
 
 @pytest.fixture
@@ -50,9 +51,25 @@ def evaluate_sequence_matcher(async_client, model_config):
 
         chat = json.loads(row["prompt"])
 
-        print(len(chat))
-
         sum_chat = summarize_conversation(chat)
+
+        output = await async_client.chat.completions.create(
+            model=model_config["model"],
+            messages=sum_chat,
+        )
+        return output.choices[0].message.content
+
+    return _evaluate
+
+@pytest.fixture
+def evaluate_spacy_sentence(async_client, model_config):
+    """Create the evaluation function for the experiment."""
+
+    async def _evaluate(row) -> str:
+
+        chat = json.loads(row["prompt"])
+
+        sum_chat = summarize_chat(chat)
 
         output = await async_client.chat.completions.create(
             model=model_config["model"],
@@ -120,3 +137,22 @@ async def test_sequence_matcher(dataset_name, evaluate_sequence_matcher, debug_m
 
     assert consumption is not None
     assert accuracy is not None
+
+@pytest.mark.asyncio
+@pytest.mark.experiment
+@pytest.mark.parametrize("dataset_name", ["MRCR-64000"])
+async def test_spacy_sentence(dataset_name, evaluate_spacy_sentence, debug_mode, settings, metadata):
+    config = settings[dataset_name]
+
+    dataset = bq.get_dataset(config)
+
+    dataset, consumption = await bq.run(dataset, evaluate_spacy_sentence)
+
+    accuracy = bq.evaluate_dataset(dataset, config)
+
+    bq.export_results("chat_history_spacy_sentence", metadata, config, consumption, accuracy)
+
+    assert consumption is not None
+    assert accuracy is not None
+
+
