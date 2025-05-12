@@ -5,5 +5,26 @@ MRCR-64000:
   accuracy: true
   consumption: true
   info:
-    max_tokens: 200
-    message_len: 5
+    max_tokens: 64000
+    min_tokens: 30000
+
+MRCR-30000:
+  benchmark: "MRCR"
+  type: csv
+  path: "datasets/benchmarks/MRCR/MRCR-30000.csv"
+  accuracy: true
+  consumption: true
+  info:
+    max_tokens: 30000
+    min_tokens: 15000
+
+MRCR-15000:
+  benchmark: "MRCR"
+  type: csv
+  path: "datasets/benchmarks/MRCR/MRCR-15000.csv"
+  accuracy: true
+  consumption: true
+  info:
+    max_tokens: 15000
+    min_tokens: 10000
+
