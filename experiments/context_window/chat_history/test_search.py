@@ -26,7 +26,7 @@ def evaluate_tfidf(async_client, model_config, sensitivity):
 
         output = await async_client.chat.completions.create(
             model=model_config["model"],
-            messages=chat,
+            messages=filtered_words,
         )
         return output.choices[0].message.content
 
