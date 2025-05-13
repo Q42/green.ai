@@ -4,12 +4,32 @@ import json
 import pandas as pd
 
 
-def find_similar_documents(conversations, sensitivity=0.2, top_n=100):
+def enhanced_filter(indexes, words, last_n=2, include_first=True):
+    # Create enhanced indexes list
+    enhanced_indexes = set(indexes)  # Original indexes
+
+    # Add first index if requested
+    if include_first:
+        enhanced_indexes.add(0)
+
+    # Add last n indexes
+    for i in range(max(0, len(words) - last_n), len(words)):
+        enhanced_indexes.add(i)
+
+    # Filter valid indexes, sort them, and get the corresponding words
+    valid_indexes = sorted([i for i in enhanced_indexes if 0 <= i < len(words)])
+
+    return set(sorted(valid_indexes))
+
+def find_similar_documents(conversations, sensitivity=0.2):
     # Extract user messages from each conversation
     documents = []
     for message in conversations:
         if isinstance(message, dict) and 'content' in message:
             documents.append(message['content'])
+
+    if not documents:
+        return [], {'target_index': None, 'similarity_scores': {}, 'top_terms': {}}
 
     # Create TF-IDF vectors
     vectorizer = TfidfVectorizer(stop_words='english')
@@ -21,49 +41,39 @@ def find_similar_documents(conversations, sensitivity=0.2, top_n=100):
 
     # Calculate cosine similarity between target and all documents
     similarities = cosine_similarity(tfidf_matrix, tfidf_matrix[target_doc_idx])
-
-    # Flatten the similarities array
     similarities = similarities.flatten()
 
     # Get all document indices except the target itself
     all_indices = list(range(len(documents)))
     all_indices.remove(target_doc_idx)
 
-    # If there are no other documents, return empty results
-    if not all_indices:
-        return [], {'target_index': target_doc_idx, 'similarity_scores': {}, 'top_terms': {}}
+    # Sort indices by similarity descending (most relevant first)
+    sorted_indices = sorted(all_indices, key=lambda idx: similarities[idx], reverse=True)
 
-    # Find the min and max similarity scores (excluding the target document)
-    min_sim = min(similarities[all_indices])
-    max_sim = max(similarities[all_indices])
-
-    if min_sim == max_sim:
-        # If all documents have the same similarity, use a binary approach
-        # sensitivity=0 returns all, sensitivity>0 returns none
-        threshold = min_sim if sensitivity == 0 else min_sim + 0.0001
+    # Determine the allowed count based on sensitivity.
+    # A sensitivity of 1 returns all documents,
+    # sensitivity of 0 returns 0 documents from similarity (only enhanced_filter would later be applied)
+    allowed_count = int(len(sorted_indices) * sensitivity)
+    # In case sensitivity is so low that allowed_count becomes 0, you might directly use the enhanced filter result.
+    if allowed_count == 0:
+        selected_indices = []
     else:
-        # Map sensitivity from [0,1] to [min_sim, max_sim]
-        # When sensitivity=0, threshold=min_sim (returns all docs)
-        # When sensitivity=1, threshold=max_sim (returns only exact matches)
-        threshold = min_sim + sensitivity * (max_sim - min_sim)
-
-    # Find documents above the threshold (excluding the target document itself)
-    similar_indices = [idx for idx in all_indices if similarities[idx] >= threshold]
+        selected_indices = sorted_indices[:allowed_count]
 
     # Sort by similarity (highest first)
-    similar_indices = sorted(similar_indices, key=lambda idx: similarities[idx], reverse=True)
+    selected_indices = enhanced_filter(selected_indices, documents, last_n=4, include_first=False)
 
-    # Limit to top_n results
-    similar_indices = similar_indices[:top_n]
     # Prepare additional information for analysis
     analysis_info = {
+        'original length': len(documents),
+        'new_length': len(selected_indices),
         'target_index': target_doc_idx,
-        'similarity_scores': {idx: similarities[idx] for idx in similar_indices},
+        'for ': {idx: similarities[idx] for idx in selected_indices},
         'top_terms': {}
     }
 
     # For each similar document, find the top common terms
-    for idx in similar_indices:
+    for idx in selected_indices:
         # Get the document vectors
         target_vector = tfidf_matrix[target_doc_idx].toarray().flatten()
         doc_vector = tfidf_matrix[idx].toarray().flatten()
@@ -77,7 +87,7 @@ def find_similar_documents(conversations, sensitivity=0.2, top_n=100):
                      common_importance[i] > 0]
         analysis_info['top_terms'][idx] = top_terms
 
-    return similar_indices, analysis_info
+    return selected_indices, analysis_info
 # Example usage:
 # Assuming tfidf_matrix and feature_names are already defined
 # and the last document index is len(tfidf_matrix) - 1
@@ -93,12 +103,13 @@ if __name__ == '__main__':
     # Find similar conversations to the last one
     similar_indices, analysis_info = find_similar_documents(
         conversations,
-        sensitivity=0.2,
-        top_n=100
+        sensitivity=0.5,
     )
 
+    print("=====begin======")
     # Use the indices to access the original conversations
-    for idx in similar_indices:
-        print(f"Similar conversation found at index {idx}:")
+    for idx in sorted(similar_indices):
         print(f"  {conversations[idx]['role']}: {conversations[idx]['content']}")
         print()
+    print("=====end======")
+    print(analysis_info)
