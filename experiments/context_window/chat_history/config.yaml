@@ -7,6 +7,16 @@ MRCR-64000:
   info:
     max_tokens: 64000
     min_tokens: 30000
+    requests: 94
+    length_0: 4.0
+    length_0.1: 28.47872340425532
+    length_0.2: 53.53191489361702
+    length_0.3: 78.51063829787235
+    length_0.4: 103.81914893617021
+    length_0.5: 128.89361702127658
+    length_0.8: 204.61702127659575
+    length_1: 252.9787234042553
+
 
 MRCR-30000:
   benchmark: "MRCR"
@@ -17,6 +27,15 @@ MRCR-30000:
   info:
     max_tokens: 30000
     min_tokens: 15000
+    requests: 100
+    length_0: 4.0
+    length_0.1: 14.65
+    length_0.2: 25.88
+    length_0.3: 37.01
+    length_0.4: 48.41
+    length_0.5: 59.68
+    length_0.8: 93.85
+    length_1: 114.64
 
 MRCR-15000:
   benchmark: "MRCR"
@@ -27,4 +46,13 @@ MRCR-15000:
   info:
     max_tokens: 15000
     min_tokens: 10000
+    requests: 102
+    length_0: 4.0
+    length_0.1: 8.068627450980392
+    length_0.2: 12.764705882352942
+    length_0.3: 17.362745098039216
+    length_0.4: 22.15686274509804
+    length_0.5: 26.84313725490196
+    length_0.8: 41.38235294117647
+    length_1: 48.96078431372549
 
