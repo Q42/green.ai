@@ -2,6 +2,7 @@ import json
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 
+embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 def enhanced_filter(indexes, words, last_n=2, include_first=True):
     # Create enhanced indexes list
@@ -20,7 +21,7 @@ def enhanced_filter(indexes, words, last_n=2, include_first=True):
 
     return set(sorted(valid_indexes))
 
-def find_similar_documents(conversations, sensitivity=0.2):
+def semantic_search(conversations, sensitivity=0.2):
     # Extract user messages from each conversation
     documents = []
     for message in conversations[:-1]:
@@ -39,7 +40,6 @@ def find_similar_documents(conversations, sensitivity=0.2):
 
     allowed_count = int(len(documents) * sensitivity)
 
-    embedder = SentenceTransformer("all-MiniLM-L6-v2")
     corpus_embeddings = embedder.encode(documents, convert_to_tensor=True)
     #corpus_embeddings = corpus_embeddings.to("cuda")
     #corpus_embeddings = util.normalize_embeddings(corpus_embeddings)
@@ -86,7 +86,7 @@ if __name__ == '__main__':
     conversations = json.loads(prompt_str)
 
     # Find similar conversations to the last one
-    similar_indices, analysis_info = find_similar_documents(
+    similar_indices, analysis_info = semantic_search(
         conversations,
         sensitivity=0.2,
     )
