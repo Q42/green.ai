@@ -24,3 +24,4 @@ dependencies:
       - mistral_common
       - spacy
       - scikit-learn
+      - sentence-transformers
