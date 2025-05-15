@@ -34,7 +34,7 @@ def evaluate_tfidf(async_client, model_config, sensitivity):
 
 @pytest.mark.asyncio
 @pytest.mark.experiment
-@pytest.mark.parametrize("dataset_name", ["MRCR-15000", "MRCR-30000", "MRCR-64000"])
+@pytest.mark.parametrize("dataset_name", ["MRCR-30000"])
 @pytest.mark.parametrize("sensitivity", [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.8, 1], indirect=True)
 async def test_tfidf(dataset_name, sensitivity, evaluate_tfidf, debug_mode, settings, metadata):
     config = settings[dataset_name]
