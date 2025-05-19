@@ -56,3 +56,20 @@ MRCR-15000:
     length_0.8: 41.38235294117647
     length_1: 48.96078431372549
 
+multi-challenge-100:
+  benchmark: "multi-challenge"
+  type: csv
+  path: "datasets/benchmarks/multi-challenge/multi-challenge-100.csv"
+  accuracy: true
+  consumption: true
+  info:
+    requests: 100
+
+multi-challenge:
+  benchmark: "multi-challenge"
+  type: csv
+  path: "datasets/benchmarks/multi-challenge/multi-challenge.csv"
+  accuracy: true
+  consumption: true
+  info:
+    requests: 272
