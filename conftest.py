@@ -32,6 +32,7 @@ def load_env(debug_mode):
     """Load environment variables from .env file."""
     dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
     load_dotenv(dotenv_path)
+    #ToDo: something isnt working with the debug, its seen as always true elsewhere in the code
 
     os.environ["debug"] = "True" if debug_mode else "False"
 
@@ -59,13 +60,13 @@ def model_config(debug_mode, model):
     """Get model configuration based on debug mode."""
     if debug_mode:
         return {
-            "model": "gpt-4o",
+            "model": "gpt-4.1",
             "api_base": "https://api.openai.com/v1",
         }
     else:
         return {
             "model": model,
-            "api_base": "http://localhost:8000/v1",
+            "api_base": "https://api.openai.com/v1",
         }
 
 
