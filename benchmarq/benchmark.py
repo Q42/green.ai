@@ -10,6 +10,8 @@ from codecarbon import EmissionsTracker
 from tqdm.asyncio import tqdm
 
 from benchmarq.benchmarks.MRCR import MRCR
+
+from benchmarq.benchmarks.multi_challenge import MultiChallenge
 from benchmarq.benchmarks.base import BaseBenchmark
 from benchmarq.results import BenchmarkResult, ConsumptionResult
 
@@ -70,6 +72,8 @@ def __get_benchmark(benchmark_name: str) -> BaseBenchmark:
     match benchmark_name:
         case "MRCR":
             return MRCR()
+        case "multi-challenge":
+            return MultiChallenge()
         case _:
             return MRCR()
 
