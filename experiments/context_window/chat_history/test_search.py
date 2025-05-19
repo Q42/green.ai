@@ -39,6 +39,7 @@ def evaluate_semantic_search(async_client, model_config, sensitivity):
 
     async def _evaluate(row) -> str:
 
+        test = row["prompt"]
         chat = json.loads(row["prompt"])
 
         indexes, info = semantic_search(chat, sensitivity=sensitivity)
@@ -76,7 +77,7 @@ async def test_tfidf(dataset_name, sensitivity, evaluate_tfidf, debug_mode, sett
 
 @pytest.mark.asyncio
 @pytest.mark.experiment
-@pytest.mark.parametrize("dataset_name", ["MRCR-30000"])
+@pytest.mark.parametrize("dataset_name", ["multi-challenge-100"])
 @pytest.mark.parametrize("sensitivity", [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.8, 1], indirect=True)
 async def test_sematic_search(dataset_name, sensitivity, evaluate_semantic_search, debug_mode, settings, metadata):
     config = settings[dataset_name]
