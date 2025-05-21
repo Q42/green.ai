@@ -21,7 +21,7 @@ def enhanced_filter(indexes, words, last_n=2, include_first=True):
 
     return set(sorted(valid_indexes))
 
-def semantic_search(conversations, sensitivity=0.2):
+def semantic_search(conversations, retention=0.2):
     # Extract user messages from each conversation
     documents = []
     for message in conversations[:-1]:
@@ -38,7 +38,7 @@ def semantic_search(conversations, sensitivity=0.2):
 
     all_indices = list(range(len(documents)))
 
-    allowed_count = int(len(documents) * sensitivity)
+    allowed_count = int(len(documents) * retention)
 
     corpus_embeddings = embedder.encode(documents, convert_to_tensor=True)
     #corpus_embeddings = corpus_embeddings.to("cuda")
@@ -50,11 +50,6 @@ def semantic_search(conversations, sensitivity=0.2):
 
     hits = util.semantic_search(query_embeddings, corpus_embeddings, score_function=util.dot_score, top_k=allowed_count)
 
-
-    # Determine the allowed count based on sensitivity.
-    # A sensitivity of 1 returns all documents,
-    # sensitivity of 0 returns 0 documents from similarity (only enhanced_filter would later be applied)
-    # In case sensitivity is so low that allowed_count becomes 0, you might directly use the enhanced filter result.
     if allowed_count == 0:
         selected_indices = []
     else:
@@ -70,12 +65,51 @@ def semantic_search(conversations, sensitivity=0.2):
         'target_index': target_doc_idx,
     }
 
-    # For each similar document, find the top common terms
+    return selected_indices, analysis_info
+
+def semantic_search_variable(conversations, sensitivity=0.2):
+    # Extract user messages from each conversation
+    documents = []
+    for message in conversations[:-1]:
+        if isinstance(message, dict) and 'content' in message:
+            documents.append(message['content'])
+
+    if not documents:
+        return [], {'target_index': None, 'similarity_scores': {}, 'top_terms': {}}
+
+    query = conversations[-1]['content']
+
+    # Get the target document (last one)
+    target_doc_idx = len(documents) - 1
+
+    all_indices = list(range(len(documents)))
+
+    corpus_embeddings = embedder.encode(documents, convert_to_tensor=True)
+    #corpus_embeddings = corpus_embeddings.to("cuda")
+    #corpus_embeddings = util.normalize_embeddings(corpus_embeddings)
+
+    query_embeddings = embedder.encode(query, convert_to_tensor=True)
+    #query_embeddings = query_embeddings.to("cuda")
+    #query_embeddings = util.normalize_embeddings(query_embeddings)
+
+    hits = util.semantic_search(query_embeddings, corpus_embeddings, score_function=util.dot_score)
+
+    filtered_hits = [hit for hit in hits[0] if hit['score'] >= sensitivity]
+
+    selected_indices = sorted([d['corpus_id'] for d in filtered_hits])
+
+    # Sort by similarity (highest first)
+    selected_indices = enhanced_filter(selected_indices, conversations, last_n=4, include_first=False)
+
+    # Prepare additional information for analysis
+    analysis_info = {
+        'original length': len(documents),
+        'new_length': len(selected_indices),
+        'target_index': target_doc_idx,
+    }
 
     return selected_indices, analysis_info
-# Example usage:
-# Assuming tfidf_matrix and feature_names are already defined
-# and the last document index is len(tfidf_matrix) - 1
+
 
 if __name__ == '__main__':
 
@@ -86,9 +120,9 @@ if __name__ == '__main__':
     conversations = json.loads(prompt_str)
 
     # Find similar conversations to the last one
-    similar_indices, analysis_info = semantic_search(
+    similar_indices, analysis_info = semantic_search_variable(
         conversations,
-        sensitivity=0.2,
+        sensitivity=0.5,
     )
 
 

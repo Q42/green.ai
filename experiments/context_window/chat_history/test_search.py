@@ -42,7 +42,7 @@ def evaluate_semantic_search(async_client, model_config, sensitivity):
         test = row["prompt"]
         chat = json.loads(row["prompt"])
 
-        indexes, info = semantic_search(chat, sensitivity=sensitivity)
+        indexes, info = semantic_search(chat, retention=sensitivity)
 
         filtered_words = [chat[i] for i in sorted(indexes) if 0 <= i < len(chat)]
 
