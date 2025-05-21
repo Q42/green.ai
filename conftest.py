@@ -2,8 +2,12 @@ import os
 import pytest
 import yaml
 
+import benchmarq as bq
+
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
+
+from experiments.context_window.input_size.test_input_size import evaluate_test_case
 
 
 def pytest_addoption(parser):
@@ -116,3 +120,17 @@ def settings(request) -> dict | None:
         pytest.fail(f"Config file not found: {config_path}")
     except yaml.YAMLError as e:
         pytest.fail(f"Error parsing YAML in {config_path}: {e}")
+
+async def pytest_sessionstart(session, evaluate_test_case):
+    if session.config.option.debug_mode:
+        pass
+    if session.config.option.model == "gpt-4.1":
+        pass
+    dataset = bq.get_dataset({
+        "type": "csv",
+        "path": "datasets/context_window/input_size/processed_OpenCaselist-5000.csv",
+        "accuracy": False,
+        "consumption": False,
+    })
+
+    _, _ = await bq.run(dataset, evaluate_test_case)
