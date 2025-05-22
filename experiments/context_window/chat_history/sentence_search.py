@@ -112,8 +112,8 @@ def semantic_search_sentence_level(conversations, retention=0.2):
     sorted_docs = sorted(doc_scores.items(), key=lambda x: x[1], reverse=True)
 
     # Apply retention filter to documents
-    allowed_count = max(1, int(len(documents) * retention))
-    selected_doc_indices = [doc_idx for doc_idx, _ in sorted_docs[:allowed_count]]
+    allowed_count_doc = max(1, int(len(documents) * retention))
+    selected_doc_indices = [doc_idx for doc_idx, _ in sorted_docs[:allowed_count_doc]]
 
     # Apply enhanced filter to document indices
     selected_doc_indices = enhanced_filter(selected_doc_indices, conversations, last_n=1, include_first=False)
@@ -122,8 +122,8 @@ def semantic_search_sentence_level(conversations, retention=0.2):
     sorted_sentences = sorted(sentence_scores.items(), key=lambda x: x[1], reverse=True)
 
     # Filter sentences to only include those from selected documents
-    selected_sentence_indices = [sent_idx for sent_idx, _ in sorted_sentences
-                                 if sentence_to_doc_map[sent_idx]['documentId'] in selected_doc_indices]
+    allowed_count_sentence = max(1, int(len(all_sentences) * retention))
+    selected_sentence_indices = [sent_idx for sent_idx, _ in sorted_sentences[:allowed_count_sentence]]
 
     # Add all sentences from the first document (if any documents exist)
     if documents and 0 in doc_to_sentences_map:
