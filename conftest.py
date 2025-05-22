@@ -70,7 +70,7 @@ def model_config(debug_mode, model):
     else:
         return {
             "model": model,
-            "api_base": "https://api.openai.com/v1",
+            "api_base": "http://localhost:8000/v1",
         }
 
 
@@ -121,11 +121,12 @@ def settings(request) -> dict | None:
     except yaml.YAMLError as e:
         pytest.fail(f"Error parsing YAML in {config_path}: {e}")
 
-async def pytest_sessionstart(session, evaluate_test_case):
+async def pytest_sessionstart(session):
     if session.config.option.debug_mode:
         pass
     if session.config.option.model == "gpt-4.1":
         pass
+
     dataset = bq.get_dataset({
         "type": "csv",
         "path": "datasets/context_window/input_size/processed_OpenCaselist-5000.csv",
@@ -133,4 +134,20 @@ async def pytest_sessionstart(session, evaluate_test_case):
         "consumption": False,
     })
 
-    _, _ = await bq.run(dataset, evaluate_test_case)
+    _, _ = await bq.run(dataset, _evaluate)
+
+async def _evaluate(row) -> str:
+    ai = AsyncOpenAI(
+        api_key=os.environ["OPENAI_API_KEY"],
+        base_url="http://localhost:8000/v1",
+    )
+    output = await ai.chat.completions.create(
+        model="mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+        messages=[
+            {"role": "system", "content": f"{row['context']}"},
+            {"role": "user", "content": f"{row['input']}"},
+        ],
+        max_tokens=50
+    )
+    return output.choices[0].message.content
+
