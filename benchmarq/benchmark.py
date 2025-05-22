@@ -24,8 +24,8 @@ def get_dataset(config: dict) -> pd.DataFrame:
         case _:
             raise ValueError(f"Unknown benchmark type: {config['type']}")
 
-    if bool(os.environ["debug"]):
-        df = df.head(2)
+    #if bool(os.environ["debug"]):
+    #    df = df.head(2)
 
     return df
 
