@@ -340,4 +340,4 @@ experiments/*/emissions.csv
 !/experiments/test/.deepeval_telemetry.txt
 /experiments/test/.deepeval_telemetry.txt
 !/datasets/benchmarks/multi-challenge/benchmark_questions.jsonl
-!/results/chat_history_semantic_search.json
+!/results/old/chat_history_semantic_search.json

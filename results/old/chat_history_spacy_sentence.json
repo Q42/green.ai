@@ -1,0 +1,56 @@
+[
+    {
+        "name": "MRCR",
+        "model": "meta-llama/Llama-3.2-3B-Instruct",
+        "debug_mode": true,
+        "score": 0.0,
+        "std": 0.0,
+        "individual_score": [
+            0,
+            0
+        ],
+        "timestamp": "2025-04-30T16:40:42",
+        "project_name": "codecarbon",
+        "run_id": "c6a54a34-0a2d-4cd2-bef6-f746c80b7b4b",
+        "experiment_id": "1",
+        "duration": 50.92660975456238,
+        "emissions": 0.0001335091977843063,
+        "emissions_rate": 2.621599953889441e-06,
+        "cpu_power": 22.5,
+        "gpu_power": 0.0,
+        "ram_power": 6.0,
+        "cpu_energy": 0.000318288867175579,
+        "gpu_energy": 0,
+        "ram_energy": 8.487582643826803e-05,
+        "energy_consumed": 0.00040316469361384704,
+        "country_name": "The Netherlands",
+        "country_iso_code": "NLD",
+        "region": "north holland",
+        "cloud_provider": "",
+        "cloud_region": "",
+        "os": "macOS-15.4.1-x86_64-i386-64bit",
+        "python_version": "3.11.0",
+        "codecarbon_version": "2.2.2",
+        "cpu_count": 16,
+        "cpu_model": "Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+        "gpu_count": null,
+        "gpu_model": null,
+        "longitude": 4.8496,
+        "latitude": 52.3664,
+        "ram_total_size": 16.0,
+        "tracking_mode": "machine",
+        "on_cloud": "N",
+        "pue": 1,
+        "config": {
+            "benchmark": "MRCR",
+            "type": "csv",
+            "path": "datasets/benchmarks/MRCR/MRCR-64000.csv",
+            "accuracy": true,
+            "consumption": true,
+            "info": {
+                "max_tokens": 200,
+                "message_len": 5
+            }
+        }
+    }
+]
