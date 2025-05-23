@@ -123,7 +123,7 @@ async def test_tfidf(dataset_name, sensitivity, evaluate_tfidf, debug_mode, sett
 
 @pytest.mark.asyncio
 @pytest.mark.experiment
-@pytest.mark.parametrize("dataset_name", ["MRCR-30000", "multi-challenge"])
+@pytest.mark.parametrize("dataset_name", ["MRCR-15000", "MRCR-8000", "MRCR-5000", "MRCR-30000", "MRCR-64000"])
 @pytest.mark.parametrize("sensitivity", [0.1, 0.2, 0.4, 0.6, 0.8, 1], indirect=True)
 async def test_sematic_search(dataset_name, sensitivity, evaluate_semantic_search, debug_mode, settings, metadata):
     config = settings[dataset_name]
