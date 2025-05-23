@@ -56,6 +56,30 @@ MRCR-15000:
     length_0.8: 41.38235294117647
     length_1: 48.96078431372549
 
+MRCR-8000:
+  benchmark: "MRCR"
+  type: csv
+  path: "datasets/benchmarks/MRCR/MRCR-8000.csv"
+  accuracy: true
+  consumption: true
+  info:
+    max_tokens: 8000
+    min_tokens: 0
+    requests: 114
+    length_1: 17.980582524271846
+
+MRCR-5000:
+  benchmark: "MRCR"
+  type: csv
+  path: "datasets/benchmarks/MRCR/MRCR-5000.csv"
+  accuracy: true
+  consumption: true
+  info:
+    max_tokens: 8000
+    min_tokens: 0
+    requests: 114
+    length_1: 10.76923076923077
+
 multi-challenge-100:
   benchmark: "multi-challenge"
   type: csv
